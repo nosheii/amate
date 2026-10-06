@@ -4,13 +4,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.amate"
+    namespace = "no.gruppe7.amate"
     compileSdk {
         version = release(37)
     }
 
     defaultConfig {
-        applicationId = "com.example.amate"
+        applicationId = "no.gruppe7.amate"
         minSdk = 26
         targetSdk = 37
         versionCode = 1
