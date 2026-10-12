@@ -1,4 +1,4 @@
-package com.example.amate.feature.tasks.data.local
+package no.gruppe7.amate.feature.tasks.data.local
 
 /** TODO: Legg til Room Entity og felt for planlegging/fullforing. */
 data class SelfCareTaskEntity(

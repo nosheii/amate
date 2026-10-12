@@ -1,9 +1,9 @@
-package com.example.amate.core.database
+package no.gruppe7.amate.core.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.example.amate.feature.water.data.local.WaterDao
-import com.example.amate.feature.water.data.local.WaterEntryEntity
+import no.gruppe7.amate.feature.water.data.local.WaterDao
+import no.gruppe7.amate.feature.water.data.local.WaterEntryEntity
 
 // Dette er hoveddatabasen til appen.
 // Her registrerer vi tabellene og DAO-ene som Room skal kjenne til.

@@ -1,4 +1,4 @@
-package com.example.amate.feature.reminders.data.local
+package no.gruppe7.amate.feature.reminders.data.local
 
 /** TODO: Legg til Room Entity for brukerens lokale paminnelser. */
 data class ReminderEntity(

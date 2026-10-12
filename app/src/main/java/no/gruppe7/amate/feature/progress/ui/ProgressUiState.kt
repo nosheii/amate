@@ -1,4 +1,4 @@
-package com.example.amate.feature.progress.ui
+package no.gruppe7.amate.feature.progress.ui
 
 data class ProgressUiState(
     val isLoading: Boolean = false,

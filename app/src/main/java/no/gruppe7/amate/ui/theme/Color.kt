@@ -1,4 +1,4 @@
-package com.example.amate.ui.theme
+package no.gruppe7.amate.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

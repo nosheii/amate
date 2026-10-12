@@ -1,4 +1,4 @@
-package com.example.amate.feature.achievements.ui
+package no.gruppe7.amate.feature.achievements.ui
 
 /** TODO: Koble AchievementRepository til AchievementsUiState. */
 class AchievementsViewModel

@@ -1,4 +1,4 @@
-package com.example.amate.core.navigation
+package no.gruppe7.amate.core.navigation
 
 enum class AppDestination(val route: String) {
     HOME("home"),

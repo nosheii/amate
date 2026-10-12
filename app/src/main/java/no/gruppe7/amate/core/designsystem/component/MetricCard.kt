@@ -1,4 +1,4 @@
-package com.example.amate.core.designsystem.component
+package no.gruppe7.amate.core.designsystem.component
 
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text

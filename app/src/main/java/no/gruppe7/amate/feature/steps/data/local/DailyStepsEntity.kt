@@ -1,4 +1,4 @@
-package com.example.amate.feature.steps.data.local
+package no.gruppe7.amate.feature.steps.data.local
 
 /** TODO: Legg til Room Entity med sammensatt nokkel for bruker og dato. */
 data class DailyStepsEntity(

@@ -1,4 +1,4 @@
-package com.example.amate.feature.water.ui
+package no.gruppe7.amate.feature.water.ui
 
 data class WaterUiState(
     val totalTodayMl: Int = 0,

@@ -1,7 +1,7 @@
-package com.example.amate
+package no.gruppe7.amate
 
 import android.app.Application
-import com.example.amate.core.di.AppContainer
+import no.gruppe7.amate.core.di.AppContainer
 
 class AmateApplication : Application() {
     val container: AppContainer by lazy { AppContainer(this) }

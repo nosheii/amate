@@ -1,4 +1,4 @@
-package com.example.amate.feature.goals.data.local
+package no.gruppe7.amate.feature.goals.data.local
 
 /** TODO: Legg til Room Entity og en tydelig maltype. */
 data class GoalEntity(

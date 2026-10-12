@@ -1,4 +1,4 @@
-package com.example.amate.core.designsystem.component
+package no.gruppe7.amate.core.designsystem.component
 
 import androidx.compose.material3.NavigationBar
 import androidx.compose.runtime.Composable

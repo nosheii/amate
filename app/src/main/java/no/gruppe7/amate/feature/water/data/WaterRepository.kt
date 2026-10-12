@@ -1,7 +1,7 @@
-package com.example.amate.feature.water.data
+package no.gruppe7.amate.feature.water.data
 
-import com.example.amate.feature.water.data.local.WaterDao
-import com.example.amate.feature.water.data.local.WaterEntryEntity
+import no.gruppe7.amate.feature.water.data.local.WaterDao
+import no.gruppe7.amate.feature.water.data.local.WaterEntryEntity
 import kotlinx.coroutines.flow.Flow
 
 /*

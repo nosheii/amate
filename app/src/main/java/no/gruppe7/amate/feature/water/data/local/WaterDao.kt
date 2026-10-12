@@ -1,4 +1,4 @@
-package com.example.amate.feature.water.data.local
+package no.gruppe7.amate.feature.water.data.local
 
 import androidx.room.Dao
 import androidx.room.Delete

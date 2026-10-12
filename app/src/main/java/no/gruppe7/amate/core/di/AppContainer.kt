@@ -1,10 +1,10 @@
-package com.example.amate.core.di
+package no.gruppe7.amate.core.di
 
 import android.content.Context
 import androidx.room.Room
-import com.example.amate.core.database.AmateDatabase
-import com.example.amate.feature.water.data.RoomWaterRepository
-import com.example.amate.feature.water.data.WaterRepository
+import no.gruppe7.amate.core.database.AmateDatabase
+import no.gruppe7.amate.feature.water.data.RoomWaterRepository
+import no.gruppe7.amate.feature.water.data.WaterRepository
 
 // Her oppretter vi felles objekter som resten av appen trenger.
 class AppContainer(context: Context) {
