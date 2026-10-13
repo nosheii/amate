@@ -1,4 +1,4 @@
-package no.gruppe7.amate.amate
+package no.gruppe7.amate
 
 import org.junit.Test
 

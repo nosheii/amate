@@ -1,7 +1,33 @@
-package com.example.amate.core.di
+package no.gruppe7.amate.core.di
 
-/**
- * TODO: Opprett database, DAO-er, repositories og Android-datakilder her.
- * Dette gir enkel manuell dependency injection uten ekstra rammeverk.
- */
-class AppContainer
+import android.content.Context
+import androidx.room.Room
+import no.gruppe7.amate.core.database.AmateDatabase
+import no.gruppe7.amate.feature.water.data.RoomWaterRepository
+import no.gruppe7.amate.feature.water.data.WaterRepository
+
+// Her oppretter vi felles objekter som resten av appen trenger.
+class AppContainer(context: Context) {
+
+    // Lager databasen første gang den faktisk blir brukt.
+    val database: AmateDatabase by lazy {
+        Room.databaseBuilder(
+            context.applicationContext,
+            AmateDatabase::class.java,
+            "amate_database",
+        ).build()
+    }
+
+
+
+    // Gir enkel tilgang til WaterDao.
+val waterDao by lazy {
+    database.waterDao()
+}
+
+// Lager repository-et og gir det tilgang til WaterDao.
+val waterRepository: WaterRepository by lazy {
+    RoomWaterRepository(waterDao)
+}
+
+} // Denne avslutter AppContainer-klassen

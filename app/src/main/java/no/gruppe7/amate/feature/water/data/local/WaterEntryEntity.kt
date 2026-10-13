@@ -1,9 +1,13 @@
-package com.example.amate.feature.water.data.local
+package no.gruppe7.amate.feature.water.data.local
 
-/** TODO: Legg til Room Entity-annotasjon og endelige felt. */
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "water_entries")
 data class WaterEntryEntity(
+    @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val userId: Long = 0,
-    val amountMl: Int = 0,
-    val loggedAtMillis: Long = 0,
+    val userId: Long,
+    val amountMl: Int,
+    val loggedAtMillis: Long,
 )

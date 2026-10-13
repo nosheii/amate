@@ -1,4 +1,4 @@
-package com.example.amate.feature.weather.ui
+package no.gruppe7.amate.feature.weather.ui
 
 data class WeatherUiState(
     val isLoading: Boolean = false,

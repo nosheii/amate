@@ -1,4 +1,4 @@
-package com.example.amate.feature.profile.data.local
+package no.gruppe7.amate.feature.profile.data.local
 
 /** TODO: Definer valgbare avatar-egenskaper. */
 data class AvatarConfigEntity(

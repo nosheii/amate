@@ -1,4 +1,4 @@
-package com.example.amate.core.network
+package no.gruppe7.amate.core.network
 
 sealed interface NetworkResult<out T> {
     data class Success<T>(val data: T) : NetworkResult<T>

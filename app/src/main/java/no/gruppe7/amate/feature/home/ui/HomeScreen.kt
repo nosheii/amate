@@ -1,4 +1,4 @@
-package com.example.amate.feature.home.ui
+package no.gruppe7.amate.feature.home.ui
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable

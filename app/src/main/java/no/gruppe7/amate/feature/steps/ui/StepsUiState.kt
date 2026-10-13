@@ -1,4 +1,4 @@
-package com.example.amate.feature.steps.ui
+package no.gruppe7.amate.feature.steps.ui
 
 data class StepsUiState(
     val stepsToday: Int = 0,

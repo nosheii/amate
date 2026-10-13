@@ -1,4 +1,4 @@
-package no.gruppe7.amate.amate.feature.weather.data.local
+package no.gruppe7.amate.feature.weather.data.local
 
 /** TODO: Legg til instrumenterte cache-tester. */
 class WeatherDaoTest

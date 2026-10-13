@@ -1,8 +1,8 @@
-package com.example.amate.core.navigation
+package no.gruppe7.amate.core.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.example.amate.feature.home.ui.HomeScreen
+import no.gruppe7.amate.feature.home.ui.HomeScreen
 
 /** TODO: Bytt plassholderen med NavHost og registrer alle destinasjonene. */
 @Composable
