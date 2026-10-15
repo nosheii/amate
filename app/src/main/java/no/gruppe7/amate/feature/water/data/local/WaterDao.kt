@@ -34,6 +34,22 @@ interface WaterDao {
     )
     fun observeEntries(userId: Long): Flow<List<WaterEntryEntity>>
 
+    // Henter bare valgt dag. Sluttidspunktet tilhører neste dag.
+    @Query(
+        """
+        SELECT * FROM water_entries
+        WHERE userId = :userId
+        AND loggedAtMillis >= :startMillis
+        AND loggedAtMillis < :endMillis
+        ORDER BY loggedAtMillis DESC, id DESC
+        """
+    )
+    fun observeEntriesForDay(
+        userId: Long,
+        startMillis: Long,
+        endMillis: Long,
+    ): Flow<List<WaterEntryEntity>>
+
     // Regner ut hvor mye vann brukeren har drukket i løpet av én dag.
     // startMillis og endMillis forteller hvilken dag vi skal summere.
     @Query(

@@ -19,6 +19,42 @@ class WaterDaoTest {
     private lateinit var database: AmateDatabase
     private lateinit var waterDao: WaterDao
 
+    @Test
+    fun dayQueries_excludeOtherUsersAndUseExclusiveEnd() = runBlocking {
+        // Starten er med, slutten er ikke med. Andre brukere skal heller ikke tas med.
+        val rows = listOf(
+            WaterEntryEntity(userId = 1, amountMl = 100, loggedAtMillis = 999),
+            WaterEntryEntity(userId = 1, amountMl = 250, loggedAtMillis = 1000),
+            WaterEntryEntity(userId = 1, amountMl = 350, loggedAtMillis = 1999),
+            WaterEntryEntity(userId = 1, amountMl = 500, loggedAtMillis = 2000),
+            WaterEntryEntity(userId = 2, amountMl = 750, loggedAtMillis = 1500),
+        )
+        rows.forEach { waterDao.insert(it) }
+        val entries = waterDao.observeEntriesForDay(1, 1000, 2000).first()
+        assertEquals(listOf(350, 250), entries.map { it.amountMl })
+        assertEquals(600, waterDao.observeTotalForDay(1, 1000, 2000).first())
+        assertEquals(0, waterDao.observeTotalForDay(1, 3000, 4000).first())
+    }
+
+    @Test
+    fun entries_surviveClosingAndReopeningDatabase() = runBlocking {
+        // Bruker en egen testfil, så appens ekte database aldri blir rørt.
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val name = "water-persistence-${java.util.UUID.randomUUID()}.db"
+        var persistent = Room.databaseBuilder(context, AmateDatabase::class.java, name).build()
+        try {
+            persistent.waterDao().insert(
+                WaterEntryEntity(userId = 1, amountMl = 375, loggedAtMillis = 1000)
+            )
+            persistent.close()
+            persistent = Room.databaseBuilder(context, AmateDatabase::class.java, name).build()
+            assertEquals(375, persistent.waterDao().observeEntries(1).first().single().amountMl)
+        } finally {
+            persistent.close()
+            context.deleteDatabase(name)
+        }
+    }
+
     // Kjøres før hver test og lager en midlertidig database.
     @Before
     fun setUp() {

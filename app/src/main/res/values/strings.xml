@@ -1,3 +1,40 @@
 <resources>
     <string name="app_name">amate</string>
+    <string name="water_brand">Amate</string>
+    <string name="water_heading">Litt vann. En liten pause.</string>
+    <string name="water_intro">Ta én liten ting om gangen.</string>
+    <string name="water_today">Vann i dag</string>
+    <string name="water_amount">%1$s ml</string>
+    <string name="water_display_goal">Visningsmål: %1$s ml</string>
+    <string name="water_goal_note">Midlertidig mål for denne visningen. Personlige mål kommer senere.</string>
+    <string name="water_progress">%1$d %% av visningsmålet</string>
+    <string name="water_quick_250">+250 ml</string>
+    <string name="water_quick_500">+500 ml</string>
+    <string name="water_custom">Legg til egen mengde</string>
+    <string name="water_history">Dagens registreringer</string>
+    <plurals name="water_count">
+        <item quantity="one">%1$d registrering</item>
+        <item quantity="other">%1$d registreringer</item>
+    </plurals>
+    <string name="water_empty_title">En ny start</string>
+    <string name="water_empty_body">Ingen vannregistreringer i dag ennå. Legg til den første når du er klar.</string>
+    <string name="water_edit">Rediger</string>
+    <string name="water_delete">Slett</string>
+    <string name="water_edit_description">Rediger registrering på %1$d ml</string>
+    <string name="water_delete_description">Slett registrering på %1$d ml</string>
+    <string name="water_add_title">Registrer vann</string>
+    <string name="water_edit_title">Rediger mengde</string>
+    <string name="water_amount_label">Mengde i milliliter</string>
+    <string name="water_amount_hint">For eksempel 250</string>
+    <string name="water_save">Lagre</string>
+    <string name="water_saving">Lagrer…</string>
+    <string name="water_cancel">Avbryt</string>
+    <string name="water_delete_title">Slette registreringen?</string>
+    <string name="water_delete_body">Registreringen på %1$d ml fjernes, og dagens total oppdateres.</string>
+    <string name="water_invalid_amount">Skriv et helt antall mellom 1 og 10 000 ml.</string>
+    <string name="water_load_error">Kunne ikke hente vannregistreringene. Prøv igjen.</string>
+    <string name="water_save_error">Endringen ble ikke lagret. Prøv igjen.</string>
+    <string name="water_retry">Prøv igjen</string>
+    <string name="water_dismiss_error">Lukk melding</string>
+    <string name="water_loading">Henter registreringer…</string>
 </resources>

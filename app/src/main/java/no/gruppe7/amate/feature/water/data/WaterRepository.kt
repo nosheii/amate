@@ -12,6 +12,12 @@ import kotlinx.coroutines.flow.Flow
  */
 interface WaterRepository {
 
+    fun observeEntriesForDay(
+        userId: Long,
+        startMillis: Long,
+        endMillis: Long,
+    ): Flow<List<WaterEntryEntity>>
+
     // Følger med på alle vannregistreringene til en bruker.
     // Flow sender automatisk en ny liste når databasen endres.
     fun observeEntries(
@@ -51,6 +57,12 @@ class RoomWaterRepository(
     private val waterDao: WaterDao,
 ) : WaterRepository {
 
+    override fun observeEntriesForDay(
+        userId: Long,
+        startMillis: Long,
+        endMillis: Long,
+    ) = waterDao.observeEntriesForDay(userId, startMillis, endMillis)
+
     // "override" betyr at jeg fyller inn en funksjon fra interfacet.
     override fun observeEntries(
         userId: Long,
@@ -80,6 +92,9 @@ class RoomWaterRepository(
         loggedAtMillis: Long,
     ): Long {
 
+        // Sjekker også her, så andre skjermer ikke kan lagre ugyldige mengder.
+        require(amountMl in 1..MAX_ENTRY_ML)
+
         // Først lager jeg et objekt som representerer en rad i databasen.
         val newEntry = WaterEntryEntity(
             userId = userId,
@@ -92,6 +107,7 @@ class RoomWaterRepository(
     }
 
     override suspend fun update(entry: WaterEntryEntity) {
+        require(entry.amountMl in 1..MAX_ENTRY_ML)
         waterDao.update(entry)
     }
 
@@ -99,3 +115,6 @@ class RoomWaterRepository(
         waterDao.delete(entry)
     }
 }
+
+// Grense mot feiltasting i én registrering, ikke et daglig drikkemål.
+const val MAX_ENTRY_ML = 10_000
