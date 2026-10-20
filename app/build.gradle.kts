@@ -37,6 +37,10 @@ android {
 }
 
 dependencies {
+    // WorkManager lar Android kjøre vannpåminnelser selv om skjermen er lukket.
+    implementation(libs.androidx.work.runtime)
+    androidTestImplementation(libs.androidx.work.testing)
+    androidTestImplementation(libs.androidx.test.rules)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
@@ -58,5 +62,7 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+    // Migreringstesten bygger også en gammel Room-database i androidTest.
+    add("kspAndroidTest", libs.androidx.room.compiler)
     androidTestImplementation(libs.androidx.room.testing)
 }
