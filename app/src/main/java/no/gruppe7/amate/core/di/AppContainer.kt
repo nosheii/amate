@@ -3,8 +3,9 @@ package no.gruppe7.amate.core.di
 import android.content.Context
 import androidx.room.Room
 import no.gruppe7.amate.core.database.AmateDatabase
-import no.gruppe7.amate.core.database.MIGRATION_1_2
-import no.gruppe7.amate.core.database.MIGRATION_2_3
+import no.gruppe7.amate.feature.goals.data.GoalRepository
+import no.gruppe7.amate.feature.goals.data.RoomGoalRepository
+import no.gruppe7.amate.core.database.ALL_DATABASE_MIGRATIONS
 import no.gruppe7.amate.feature.reminders.scheduling.WaterReminderNotifications
 import no.gruppe7.amate.feature.reminders.scheduling.WaterReminderRunner
 import no.gruppe7.amate.feature.reminders.scheduling.WorkManagerReminderScheduler
@@ -21,12 +22,13 @@ class AppContainer(context: Context) {
     // by lazy husker resultatet, så senere bruk får den samme databaseinstansen.
     // amate_database er filnavnet på telefonen. addMigrations oppgraderer den gamle filen
     // i stedet for å slette brukerens data når tabellene endres.
+    // Hele oppgraderingslisten er felles for appen og migreringstestene.
     val database: AmateDatabase by lazy {
         Room.databaseBuilder(
             context.applicationContext,
             AmateDatabase::class.java,
             "amate_database",
-        ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build()
+        ).addMigrations(*ALL_DATABASE_MIGRATIONS).build()
     }
 
     // Gir enkel tilgang til WaterDao.
@@ -37,6 +39,10 @@ class AppContainer(context: Context) {
     val reminderRepository: ReminderRepository by lazy {
         RoomReminderRepository(database.reminderDao())
     }
+
+    // Mål får sin egen DAO og sitt eget repository, men deler database med vann/påminnelser.
+    val goalDao by lazy { database.goalDao() }
+    val goalRepository: GoalRepository by lazy { RoomGoalRepository(goalDao) }
 
     // Android-delen lager kanalen, sjekker tillatelse og viser/fjerner varsler.
     val waterReminderNotifications by lazy { WaterReminderNotifications(context) }

@@ -25,14 +25,17 @@ Bruker-ID er fortsatt 1, som i vannfunksjonen, frem til profilen kobles på.
 
 ## Databasen oppgraderes uten å slette vannloggen
 
-`AmateDatabase.kt` har nå versjon 3. Migrering 1 → 2 legger til innstillingene,
-og 2 → 3 legger til en liten sendelogg. Eksisterende vann og valg beholdes.
-`AppContainer.kt` registrerer migreringen og oppretter begge repositories med samme
+`AmateDatabase.kt` har nå versjon 4. Migrering 1 → 2 legger til innstillingene,
+2 → 3 legger til en liten sendelogg, og 3 → 4 legger til mål og gjøremål.
+Eksisterende vann og valg beholdes. En direkte 2 → 4-vei støtter også Najmas
+utviklingsdatabase, som brukte versjon 2 til mål/gjøremål i stedet for påminnelser.
+`AppContainer.kt` registrerer `ALL_DATABASE_MIGRATIONS` og oppretter repositories med samme
 database. Det brukes ingen destruktiv fallback.
 
 `DatabaseMigrationTest.kt` lager en ekte versjon-1-database med vannregistrering,
 oppgraderer den med samme migrering som appen, og sjekker at vannet fortsatt finnes.
-Den tester også oppgradering fra versjon 2 med bevarte innstillinger.
+Den tester også begge versjon-2-variantene og main sin versjon 3, med bevarte
+vannregistreringer, innstillinger, sendelogg og eventuelle mål/gjøremål.
 
 ## Slik fungerer påminnelsene
 
@@ -118,7 +121,8 @@ Alle tekster ligger i `app/src/main/res/values/strings.xml`.
 - `ReminderDaoTest.kt` har fire tester av standardvalg, oppdatering, validering og
   gjenåpning av databasen.
 - `ReminderSettingsScreenTest.kt` har to tester av feltene, lagring og Avbryt.
-- `DatabaseMigrationTest.kt` sjekker 1 → 3 og 2 → 3 med bevart vannlogg og innstillinger.
+- `DatabaseMigrationTest.kt` sjekker 1 → 4, begge 2 → 4-variantene og 3 → 4,
+  og at eksisterende data beholdes mens de nye tabellene kan tas i bruk.
 - `WaterReminderPlanTest.kt` tester tidspunkt, dagbytte, sommertid, endringer og duplikatvern.
 - `WaterReminderRunnerTest.kt` tester med ekte Room og falsk klokke/varsler, også parallelle
   kall og gjenåpnet database.
@@ -160,3 +164,8 @@ under batterisparing/Doze er ikke langtidstestet.
 Etter at testknappen ble lagt til, bestod også 6 målrettede Android-tester for
 innstillingsskjermen, testknappen og varselvisningen. De 28 lokale testene, bygg
 og lint ble kjørt på nytt og bestod.
+
+Etter kombinasjonen med mål 20. oktober 2026 bestod alle 34 Android-tester,
+inkludert fire migreringstester, og de 28 lokale testene. Debug-bygg og lint bestod
+også. Testene dekker bevaring av vann, mål/gjøremål og påminnelsesdata fra de kjente
+eldre databaseskjemaene; det brukes ingen destruktiv fallback.

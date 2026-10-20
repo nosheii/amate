@@ -7,7 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import no.gruppe7.amate.core.database.AmateDatabase
-import no.gruppe7.amate.core.database.MIGRATION_1_2
+import no.gruppe7.amate.core.database.ALL_DATABASE_MIGRATIONS
 import no.gruppe7.amate.feature.reminders.data.RoomReminderRepository
 import org.junit.After
 import org.junit.Assert.*
@@ -55,12 +55,12 @@ class ReminderDaoTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val name = "reminders-persistence-${java.util.UUID.randomUUID()}.db"
         var persistent = Room.databaseBuilder(context, AmateDatabase::class.java, name)
-            .addMigrations(MIGRATION_1_2).build()
+            .addMigrations(*ALL_DATABASE_MIGRATIONS).build()
         try {
             persistent.reminderDao().save(ReminderEntity(1, true, 4, 600, 1200))
             persistent.close()
             persistent = Room.databaseBuilder(context, AmateDatabase::class.java, name)
-                .addMigrations(MIGRATION_1_2).build()
+                .addMigrations(*ALL_DATABASE_MIGRATIONS).build()
             assertEquals(ReminderEntity(1, true, 4, 600, 1200), persistent.reminderDao().observeSettings(1).first())
         } finally {
             persistent.close()

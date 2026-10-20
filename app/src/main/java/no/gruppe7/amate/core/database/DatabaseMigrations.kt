@@ -46,3 +46,50 @@ val MIGRATION_2_3 = object : Migration(2, 3) {
         )
     }
 }
+
+// Samler mål og påminnelser i versjon 4. Eksisterende vann og innstillinger røres ikke.
+// Kolonnenavn, typer og den unike indeksen må samsvare med Najmas Entity-klasser.
+val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS goals (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                userId INTEGER NOT NULL,
+                type TEXT NOT NULL,
+                targetValue INTEGER NOT NULL,
+                isActive INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        // Samme bruker skal ikke kunne få to mål av samme type.
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_goals_userId_type ON goals (userId, type)")
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS self_care_tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                userId INTEGER NOT NULL,
+                title TEXT NOT NULL,
+                scheduledForMillis INTEGER NOT NULL,
+                isCompleted INTEGER NOT NULL,
+                completedAtMillis INTEGER
+            )
+            """.trimIndent()
+        )
+    }
+}
+
+// Under utvikling fikk begge branchene en versjon 2, med forskjellige tabeller.
+// Gå direkte 2 → 4, så også en emulator med Najmas gamle mål kan oppgraderes trygt.
+// IF NOT EXISTS beholder tabeller og data som finnes, og legger bare til det som mangler.
+val MIGRATION_2_4 = object : Migration(2, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        MIGRATION_1_2.migrate(db)
+        MIGRATION_2_3.migrate(db)
+        MIGRATION_3_4.migrate(db)
+    }
+}
+
+// Appen og testene bruker samme liste, så en ny oppgraderingsvei ikke glemmes ett sted.
+// Room velger den direkte 2 → 4-veien når den finnes. Den gamle 2 → 3 beholdes uendret.
+val ALL_DATABASE_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_2_4)
