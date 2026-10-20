@@ -1,0 +1,7 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <!-- En enkel, ensfarget dråpe fungerer som lite ikon i Androids varselfelt. -->
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M12,2C9,6 5,10.5 5,15a7,7 0,0 0,14 0C19,10.5 15,6 12,2Z" />
+</vector>

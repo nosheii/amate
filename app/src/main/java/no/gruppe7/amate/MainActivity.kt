@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import no.gruppe7.amate.feature.water.ui.WaterRoute
+import no.gruppe7.amate.feature.reminders.ui.ReminderSettingsRoute
 import no.gruppe7.amate.ui.theme.AmateTheme
 
 class MainActivity : ComponentActivity() {
@@ -14,8 +15,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             AmateTheme {
                 // Midlertidig startside for vann. Felles navigasjon kobles på senere.
-                val repository = (application as AmateApplication).container.waterRepository
-                WaterRoute(repository = repository)
+                val container = (application as AmateApplication).container
+                // Vannskjermen får sitt repository. Påminnelsesfeltet sendes inn som en egen UI-del.
+                // Dermed kan vi senere flytte innstillingene uten å bygge om vannregistreringen.
+                WaterRoute(
+                    repository = container.waterRepository,
+                    reminderSettings = { ReminderSettingsRoute(container.reminderRepository) },
+                )
             }
         }
     }

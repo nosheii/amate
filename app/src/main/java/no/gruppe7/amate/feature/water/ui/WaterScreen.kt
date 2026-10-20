@@ -78,7 +78,13 @@ private val WaterColors = lightColorScheme(
 )
 
 @Composable
-fun WaterRoute(repository: WaterRepository, modifier: Modifier = Modifier) {
+fun WaterRoute(
+    repository: WaterRepository,
+    modifier: Modifier = Modifier,
+    // En valgfri UI-del. null betyr at denne visningen ikke skal ha påminnelsesinnstillinger.
+    // Den sendes inn utenfra, så vannskjermen slipper å kjenne påminnelsenes database og tillatelser.
+    reminderSettings: (@Composable () -> Unit)? = null,
+) {
     val factory = remember(repository) { WaterViewModel.factory(repository) }
     val model: WaterViewModel = viewModel(factory = factory)
     val state by model.uiState.collectAsStateWithLifecycle()
@@ -97,6 +103,7 @@ fun WaterRoute(repository: WaterRepository, modifier: Modifier = Modifier) {
             onSaveEdit = model::saveEditor,
             onCancelEdit = model::closeEditor,
             modifier = modifier,
+            reminderSettings = reminderSettings,
         )
         state.pendingDeletion?.let { entry ->
             AlertDialog(
@@ -139,6 +146,7 @@ fun WaterScreen(
     onSaveEdit: () -> Unit,
     onCancelEdit: () -> Unit,
     modifier: Modifier = Modifier,
+    reminderSettings: (@Composable () -> Unit)? = null,
 ) {
     val locale = Locale.forLanguageTag("nb-NO")
     val numbers = remember { NumberFormat.getIntegerInstance(locale) }
@@ -269,6 +277,10 @@ fun WaterScreen(
                         }
                     }
                 }
+            }
+            // Innstillingene settes inn her, men har sin egen ViewModel og sitt eget datalag.
+            reminderSettings?.let { settings ->
+                item(key = "water_reminder_settings") { settings() }
             }
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
