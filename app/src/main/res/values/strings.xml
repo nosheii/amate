@@ -37,4 +37,32 @@
     <string name="water_retry">Prøv igjen</string>
     <string name="water_dismiss_error">Lukk melding</string>
     <string name="water_loading">Henter registreringer…</string>
+
+    <!--- Felles strenger som alle features kan bruke -->
+    <string name="common_save">Lagre</string>
+    <string name="common_saving">Lagrer</string>
+    <string name="common_cancel">Avbryt</string>
+    <string name="common_retry">Prøv igjen</string>
+    <string name="common_dismiss_error">Lukk melding</string>
+
+    <!--- Mål -->
+    <string name="goals_title">Mine mål</string>
+    <string name="goals_intro">Sett mål som passer deg. Du kan endre dem når du vil</string>
+    <string name="goals_water">Vann</string>
+    <string name="goals_steps">Skritt</string>
+    <string name="goals_water_value">%1$s ml om dagen</string>
+    <string name="goals_steps_value">%1$s skritt om dagen</string>
+    <string name="goals_not_set">Ikke satt ennå</string>
+    <string name="goals_set">Sett mål</string>
+    <string name="goals_edit">Rediger</string>
+    <string name="goals_remove">Fjern</string>
+    <string name="goals_edit_description">Rediger målet for %1$s</string>
+    <string name="goals_edit_title">Mål for %1$s</string>
+    <string name="goals_value_label_water">Milliliter per dag</string>
+    <string name="goals_value_label_steps">Skritt per dag</string>
+    <string name="goals_invalid_water">Skriv et helt tall mellom 500 og 10 000 ml.</string>
+    <string name="goals_invalid_steps">Skriv et helt tall mellom 1 000 og 50 000 skritt.</string>
+    <string name="goals_load_error">Kunne ikke hente målene. Prøv igjen.</string>
+    <string name="goals_save_error">Målet ble ikke lagret. Prøv igjen.</string>
+    <string name="goals_loading">Henter mål...</string>
 </resources>
