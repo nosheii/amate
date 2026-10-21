@@ -53,7 +53,7 @@ class WaterReminderNotifications(context: Context) : WaterReminderNotifier {
     private fun post(tag: String, id: Int, title: String, body: String): Boolean {
         if (!isAllowed()) return false
         // PendingIntent er en handling Android kan utføre senere, når varselet trykkes.
-        // Den åpner MainActivity, som foreløpig viser vannskjermen.
+        // Den åpner MainActivity. Fra hjemmeskallet kan brukeren gå videre til vannregistrering.
         // UPDATE_CURRENT gjenbruker handlingen; IMMUTABLE låser innholdet mot endring ved bruk.
         val openApp = PendingIntent.getActivity(context, 0,
             Intent(context, MainActivity::class.java).apply {
