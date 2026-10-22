@@ -93,4 +93,28 @@
     <string name="reminders_test_blocked">Testvarselet ble ikke sendt fordi varsler er blokkert. Åpne varselinnstillingene og tillat vannpåminnelser.</string>
     <string name="reminders_test_notification_title">Amate – testvarsel</string>
     <string name="reminders_test_notification_body">Dette er bare en test. Trykk her for å åpne Amate.</string>
+    <!-- Enkelt hjemmeskall. Streker er plassholdere, ikke ekte registreringer. -->
+    <string name="home_tagline">Din lille pause i hverdagen</string>
+    <string name="home_encouragement">Små steg teller.\nDu gjør det bedre enn du tror.</string>
+    <string name="home_greeting">Hei, fint å se deg!</string>
+    <string name="home_preview_note">Foreløpig visning · kortene viser ikke lagrede data ennå.</string>
+    <string name="home_weather">Vær og pollen</string>
+    <string name="home_coming_later">Kommer senere</string>
+    <string name="home_today">Dagens små mål</string>
+    <string name="home_steps">— skritt</string>
+    <string name="home_not_connected">Ikke koblet til ennå</string>
+    <string name="home_water">— ml vann</string>
+    <string name="home_water_hint">Åpne vannskjermen for dagens faktiske mengde.</string>
+    <string name="home_register_water">Registrer vann</string>
+    <string name="home_streak">— dager på rad</string>
+    <string name="home_achievements">— merker</string>
+    <string name="home_nav_home">Hjem</string>
+    <string name="home_nav_progress">Fremgang</string>
+    <string name="home_nav_profile">Profil</string>
+    <string name="home_open_settings">Åpne innstillinger</string>
+    <string name="home_back">Tilbake til hjem</string>
+    <string name="home_water_title">Vannregistrering</string>
+    <string name="home_settings_title">Innstillinger</string>
+    <string name="home_settings_intro">Her finner du vannpåminnelsene. Flere innstillinger kan legges til senere.</string>
+    <string name="home_placeholder_body">Her kommer det mer etter hvert. Foreløpig er dette bare et skall, uten personlige data.</string>
 </resources>
