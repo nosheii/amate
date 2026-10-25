@@ -5,8 +5,10 @@
     <string name="water_intro">Ta én liten ting om gangen.</string>
     <string name="water_today">Vann i dag</string>
     <string name="water_amount">%1$s ml</string>
-    <string name="water_display_goal">Visningsmål: %1$s ml</string>
-    <string name="water_goal_note">Midlertidig mål for denne visningen. Personlige mål kommer senere.</string>
+    <string name="water_goal_value">Dagsmål: %1$s ml</string>
+    <string name="water_goal_missing">Mål ikke satt</string>
+    <string name="water_goal_loading">Henter vannmålet…</string>
+    <string name="water_goal_load_error">Kunne ikke hente vannmålet. Prøv igjen.</string>
     <string name="water_progress">%1$d %% av visningsmålet</string>
     <string name="water_quick_250">+250 ml</string>
     <string name="water_quick_500">+500 ml</string>
@@ -97,7 +99,7 @@
     <string name="home_tagline">Din lille pause i hverdagen</string>
     <string name="home_encouragement">Små steg teller.\nDu gjør det bedre enn du tror.</string>
     <string name="home_greeting">Hei, fint å se deg!</string>
-    <string name="home_preview_note">Foreløpig visning · kortene viser ikke lagrede data ennå.</string>
+    <string name="home_preview_note">Vannkortet viser dagens registreringer. De andre kortene kommer senere.</string>
     <string name="home_weather">Vær og pollen</string>
     <string name="home_coming_later">Kommer senere</string>
     <string name="home_today">Dagens små mål</string>

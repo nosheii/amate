@@ -13,6 +13,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import no.gruppe7.amate.MainActivity
 import no.gruppe7.amate.R
+import java.util.UUID
 
 // Her ligger Android-delen av varslingen. Denne klassen bestemmer ikke når noe skal sendes.
 // Både bakgrunnsjobben og testknappen bruker den, men med ulike varsel-ID-er.
@@ -53,10 +54,14 @@ class WaterReminderNotifications(context: Context) : WaterReminderNotifier {
     private fun post(tag: String, id: Int, title: String, body: String): Boolean {
         if (!isAllowed()) return false
         // PendingIntent er en handling Android kan utføre senere, når varselet trykkes.
-        // Den åpner MainActivity. Fra hjemmeskallet kan brukeren gå videre til vannregistrering.
+        // Handlingen under ber MainActivity åpne vannregistrering direkte, også fra en annen fane.
         // UPDATE_CURRENT gjenbruker handlingen; IMMUTABLE låser innholdet mot endring ved bruk.
         val openApp = PendingIntent.getActivity(context, 0,
             Intent(context, MainActivity::class.java).apply {
+                action = MainActivity.ACTION_OPEN_WATER
+                // Ny ID per varsel gjør at appen kan skille et nytt trykk fra en gammel,
+                // gjenopprettet startmelding. Dette er en tilfeldig ID, ikke en bruker-ID.
+                putExtra(MainActivity.EXTRA_WATER_REQUEST_ID, UUID.randomUUID().toString())
                 // CLEAR_TOP går tilbake til Activity-en hvis den finnes i oppgavestakken.
                 // SINGLE_TOP gjenbruker den hvis den da ligger øverst, i stedet for en ekstra kopi.
                 flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP

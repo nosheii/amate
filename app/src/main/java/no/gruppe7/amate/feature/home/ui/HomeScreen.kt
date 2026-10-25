@@ -19,13 +19,16 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -38,6 +41,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.gruppe7.amate.R
+import no.gruppe7.amate.feature.water.ui.WaterGoalSummary
+import no.gruppe7.amate.feature.water.ui.WaterUiState
+import java.text.NumberFormat
+import java.util.Locale
 
 // Foreløpige farger til skallet. Vi endrer ikke det felles designsystemet til gruppa.
 private val Cream = Color(0xFFFFFBF1)
@@ -66,9 +73,12 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     onOpenWater: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
+    waterState: WaterUiState = WaterUiState(),
+    onRetryWater: () -> Unit = {},
 ) {
-    // Bare visning her: ingen ViewModel, Room eller oppdiktede brukerdata.
-    // Callbackene sier fra om knappetrykk. Den som viser skjermen bestemmer hvor vi går.
+    // Forsiden får en ferdig tilstand fra vannmodellen. Jeg gjør ikke egne databasekall her.
+    // Da kan vannkortet vise ekte tall, mens resten av forsiden fortsatt er et skall.
+    val numbers = remember { NumberFormat.getIntegerInstance(Locale.forLanguageTag("nb-NO")) }
     Box(
         modifier.fillMaxSize().background(
             Brush.verticalGradient(listOf(Sky, Color(0xFFF5F4DC), Color(0xFFE3EACF)))
@@ -104,7 +114,7 @@ fun HomeScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(stringResource(R.string.home_greeting), style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold)
-                    // Streker i kortene betyr ikke at brukeren har null registreringer.
+                    // Bare vann er koblet til data nå. De andre strekene betyr fortsatt plassholdere.
                     Text(stringResource(R.string.home_preview_note), style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
@@ -144,12 +154,23 @@ fun HomeScreen(
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                         IconTile(HomeIcons.Water, Color(0xFFDCECF4), WaterBlue)
                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text(stringResource(R.string.home_water), color = WaterBlue, fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.titleLarge)
-                            Text(stringResource(R.string.home_water_hint), style = MaterialTheme.typography.bodySmall)
+                            Text(stringResource(R.string.water_today), fontWeight = FontWeight.Bold)
+                            when {
+                                waterState.isLoading -> CircularProgressIndicator(Modifier.size(24.dp))
+                                waterState.loadFailed -> {
+                                    Text(stringResource(R.string.water_load_error), color = MaterialTheme.colorScheme.error)
+                                    TextButton(onClick = onRetryWater, modifier = Modifier.testTag("home_water_retry")) {
+                                        Text(stringResource(R.string.water_retry))
+                                    }
+                                }
+                                else -> Text(stringResource(R.string.water_amount, numbers.format(waterState.totalTodayMl)),
+                                    color = WaterBlue, fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.titleLarge, modifier = Modifier.testTag("home_water_total"))
+                            }
                         }
                     }
-                    // Bare en snarvei. Den gamle vannskjermen henter og lagrer fortsatt dataene.
+                    WaterGoalSummary(waterState, onRetryWater, tagPrefix = "home")
+                    // Knappen går fortsatt til selve registreringen. Forsiden lagrer ingenting selv.
                     Button(onClick = onOpenWater, modifier = Modifier.fillMaxWidth().testTag("home_open_water"),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFAA5B12)),
                         shape = RoundedCornerShape(16.dp), contentPadding = PaddingValues(14.dp)) {
@@ -198,5 +219,5 @@ private fun SummaryCard(icon: ImageVector, title: Int, tint: Color, modifier: Mo
 @Preview(showBackground = true, widthDp = 390, heightDp = 900)
 @Composable
 private fun HomePreview() {
-    HomeShellTheme { HomeScreen() }
+    HomeShellTheme { HomeScreen(waterState = WaterUiState(isLoading = false, isGoalLoading = false)) }
 }
