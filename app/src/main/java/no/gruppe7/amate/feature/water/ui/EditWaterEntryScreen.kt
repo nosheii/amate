@@ -43,7 +43,8 @@ fun InlineWaterEditor(
             style = MaterialTheme.typography.titleSmall,
         )
         WaterAmountField(state, onAmountChange)
-        state.errorMessageResId?.let {
+        // Lagringsfeilen hører til dette feltet. Lesefeil vises separat i listen, ikke dobbelt her.
+        state.errorMessageResId?.takeIf { it == R.string.water_save_error }?.let {
             Text(stringResource(it), color = MaterialTheme.colorScheme.error)
         }
         Row(

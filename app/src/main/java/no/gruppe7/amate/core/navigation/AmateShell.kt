@@ -23,6 +23,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -38,16 +39,29 @@ import no.gruppe7.amate.R
 import no.gruppe7.amate.feature.home.ui.HomeIcons
 import no.gruppe7.amate.feature.home.ui.HomeScreen
 import no.gruppe7.amate.feature.home.ui.HomeShellTheme
+import no.gruppe7.amate.feature.water.ui.WaterUiState
 
 @Composable
 fun AmateShell(
     waterContent: @Composable () -> Unit,
     settingsContent: @Composable () -> Unit,
+    waterState: WaterUiState = WaterUiState(),
+    onRetryWater: () -> Unit = {},
+    navigationRequest: AppDestination? = null,
+    onNavigationHandled: () -> Unit = {},
 ) {
     // En liten, midlertidig skjermvelger, ikke gruppas ferdige navigasjonsløsning.
     // rememberSaveable beholder valgt skjerm ved for eksempel rotasjon av telefonen.
     // Innholdet sendes inn, så selve skallet ikke trenger en database eller AppContainer.
     var destination by rememberSaveable { mutableStateOf(AppDestination.HOME) }
+    LaunchedEffect(navigationRequest) {
+        navigationRequest?.let {
+            destination = it
+            // Varselet er en engangsbeskjed, ikke en fast startside. Etterpå kan vi gå hjem igjen
+            // uten at hver ny opptegning eller rotasjon sender oss tilbake til vannskjermen.
+            onNavigationHandled()
+        }
+    }
     val goHome = { destination = AppDestination.HOME }
     BackHandler(enabled = destination != AppDestination.HOME, onBack = goHome)
 
@@ -100,6 +114,8 @@ fun AmateShell(
                     AppDestination.HOME -> HomeScreen(
                         onOpenWater = { destination = AppDestination.WATER },
                         onOpenSettings = { destination = AppDestination.SETTINGS },
+                        waterState = waterState,
+                        onRetryWater = onRetryWater,
                     )
                     AppDestination.WATER -> waterContent()
                     AppDestination.SETTINGS -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {

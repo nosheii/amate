@@ -19,6 +19,9 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import no.gruppe7.amate.R
+import no.gruppe7.amate.feature.goals.data.GoalRepository
+import no.gruppe7.amate.feature.goals.data.local.GoalEntity
+import no.gruppe7.amate.feature.goals.data.local.GoalType
 import no.gruppe7.amate.feature.water.data.WaterRepository
 import no.gruppe7.amate.feature.water.data.local.WaterEntryEntity
 import org.junit.After
@@ -30,6 +33,7 @@ import org.junit.Test
 class WaterViewModelTest {
     private val store = ViewModelStore()
     private val repository = FakeWaterRepository()
+    private val goals = FakeGoalRepository()
     private val clock = MutableClock(Instant.parse("2026-10-15T12:00:00Z"))
     private var zone = ZoneId.of("Europe/Oslo")
 
@@ -44,7 +48,7 @@ class WaterViewModelTest {
     }
 
     private fun model(): WaterViewModel = WaterViewModel(
-        repository = repository, clock = clock, zoneProvider = { zone },
+        repository = repository, goalRepository = goals, clock = clock, zoneProvider = { zone },
     ).also { store.put("water", it) }
 
     private fun waterTest(block: suspend TestScope.() -> Unit) = runTest {
@@ -162,18 +166,22 @@ class WaterViewModelTest {
 
     @Test
     fun midnight_refreshesTheDayWithoutDeletingHistory() = waterTest {
+        goals.goal.value = GoalEntity(userId = 1, targetValue = 2500)
         clock.now = Instant.parse("2026-10-15T21:59:50Z") // 23:59 i Oslo.
         val model = model()
         runCurrent()
         model.addQuick(250)
         runCurrent()
         assertEquals(250L, model.uiState.value.totalTodayMl)
+        model.openEditor(model.uiState.value.entries.single())
         clock.now = clock.now.plusSeconds(30)
         advanceTimeBy(30_000)
         runCurrent()
         assertEquals("2026-10-16", model.uiState.value.date.toString())
         assertEquals(0L, model.uiState.value.totalTodayMl)
         assertEquals(1, repository.entries.value.size)
+        assertEquals(2500, model.uiState.value.goalMl)
+        assertFalse(model.uiState.value.isEditorOpen)
     }
 
     @Test
@@ -210,6 +218,107 @@ class WaterViewModelTest {
         assertEquals(listOf(1L), model.uiState.value.entries.map { it.id })
         assertEquals(250L, model.uiState.value.totalTodayMl)
     }
+
+    @Test
+    fun missingChangedAndDeletedGoal_updatesMeterWithoutChangingWater() = waterTest {
+        val model = model()
+        runCurrent()
+        assertNull(model.uiState.value.goalMl)
+        assertNull(model.uiState.value.progress)
+        model.addQuick(500)
+        runCurrent()
+        assertEquals(500L, model.uiState.value.totalTodayMl)
+
+        goals.goal.value = GoalEntity(id = 1, userId = 1, targetValue = 2000)
+        runCurrent()
+        assertEquals(2000, model.uiState.value.goalMl)
+        assertEquals(0.25f, model.uiState.value.progress!!, 0.001f)
+        goals.goal.value = goals.goal.value!!.copy(targetValue = 1000)
+        runCurrent()
+        assertEquals(0.5f, model.uiState.value.progress!!, 0.001f)
+        goals.goal.value = null
+        runCurrent()
+        assertNull(model.uiState.value.goalMl)
+        assertNull(model.uiState.value.progress)
+        assertEquals(500L, model.uiState.value.totalTodayMl)
+    }
+
+    @Test
+    fun goalFailure_doesNotBlockWaterAndCanBeRetried() = waterTest {
+        goals.failRead = true
+        val model = model()
+        runCurrent()
+        assertTrue(model.uiState.value.goalLoadFailed)
+        assertFalse(model.uiState.value.loadFailed)
+        model.addQuick(375)
+        runCurrent()
+        assertEquals(375L, model.uiState.value.totalTodayMl)
+        assertNull(model.uiState.value.progress)
+        goals.failRead = false
+        goals.goal.value = GoalEntity(userId = 1, targetValue = 1500)
+        model.retry()
+        runCurrent()
+        assertFalse(model.uiState.value.goalLoadFailed)
+        assertEquals(1500, model.uiState.value.goalMl)
+        assertEquals(375L, model.uiState.value.totalTodayMl)
+    }
+
+    @Test
+    fun stepsGoalsOtherUsersAndInactiveGoalsAreNotWaterTargets() = waterTest {
+        val model = model()
+        runCurrent()
+        for (goal in listOf(
+            GoalEntity(userId = 2, targetValue = 3000),
+            GoalEntity(userId = 1, type = GoalType.STEPS, targetValue = 10000),
+            GoalEntity(userId = 1, targetValue = 2000, isActive = false),
+        )) {
+            goals.goal.value = goal
+            runCurrent()
+            assertNull(model.uiState.value.goalMl)
+            assertNull(model.uiState.value.progress)
+        }
+    }
+
+    @Test
+    fun meterNeverDividesByZeroOrGoesPastFull() = waterTest {
+        val model = model()
+        runCurrent()
+        goals.goal.value = GoalEntity(userId = 1, targetValue = 0)
+        model.addQuick(3000)
+        runCurrent()
+        assertNull(model.uiState.value.progress)
+        goals.goal.value = GoalEntity(userId = 1, targetValue = 1000)
+        runCurrent()
+        assertEquals(1f, model.uiState.value.progress!!, 0.001f)
+    }
+
+    @Test
+    fun listOnlyShowsWriteErrorWhenNoEditorOrDeleteDialogOwnsIt() {
+        val state = WaterUiState(errorMessageResId = R.string.water_save_error)
+        assertEquals(R.string.water_save_error, state.listErrorMessageResId)
+        assertNull(state.copy(isEditorOpen = true).listErrorMessageResId)
+        assertNull(state.copy(pendingDeletion = WaterEntryEntity(id = 1, userId = 1, amountMl = 250,
+            loggedAtMillis = 0)).listErrorMessageResId)
+        // En annen feiltype: selv med editoren åpen skal det gå an å prøve innlasting på nytt.
+        assertEquals(R.string.water_load_error,
+            state.copy(isEditorOpen = true, loadFailed = true).listErrorMessageResId)
+    }
+}
+
+// Samme kontrakt som Najmas repository. Bare lagringsstedet er byttet ut for denne testen.
+private class FakeGoalRepository : GoalRepository {
+    val goal = MutableStateFlow<GoalEntity?>(null)
+    var failRead = false
+    override fun observeGoal(userId: Long, type: GoalType): Flow<GoalEntity?> {
+        if (failRead) return flow { error("Test: kunne ikke hente mål") }
+        return goal.map { it?.takeIf { row -> row.userId == userId && row.type == type && row.isActive } }
+    }
+    override fun observeGoals(userId: Long) = goal.map { listOfNotNull(it?.takeIf { row -> row.userId == userId }) }
+    override suspend fun saveGoal(userId: Long, type: GoalType, targetValue: Int): Long {
+        goal.value = GoalEntity(id = 1, userId = userId, type = type, targetValue = targetValue)
+        return 1
+    }
+    override suspend fun deleteGoal(goal: GoalEntity) { this.goal.value = null }
 }
 
 private class MutableClock(var now: Instant) : Clock() {
