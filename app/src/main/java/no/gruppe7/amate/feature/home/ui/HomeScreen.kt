@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import no.gruppe7.amate.R
 import no.gruppe7.amate.feature.water.ui.WaterGoalSummary
 import no.gruppe7.amate.feature.water.ui.WaterUiState
+import no.gruppe7.amate.feature.weather.ui.WeatherCard
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -75,6 +76,7 @@ fun HomeScreen(
     onOpenSettings: () -> Unit = {},
     waterState: WaterUiState = WaterUiState(),
     onRetryWater: () -> Unit = {},
+    weatherContent: @Composable () -> Unit = { WeatherCard() },
 ) {
     // Forsiden får en ferdig tilstand fra vannmodellen. Jeg gjør ikke egne databasekall her.
     // Da kan vannkortet vise ekte tall, mens resten av forsiden fortsatt er et skall.
@@ -114,21 +116,15 @@ fun HomeScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(stringResource(R.string.home_greeting), style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold)
-                    // Bare vann er koblet til data nå. De andre strekene betyr fortsatt plassholdere.
+                    // Vann og vær er koblet til data. Resten er foreløpig plassholdere.
                     Text(stringResource(R.string.home_preview_note), style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
             item {
                 HomeCard {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                        IconTile(HomeIcons.Sun, Color(0xFFFFE8AC), Color(0xFFA36C15))
-                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text(stringResource(R.string.home_weather), fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.titleMedium)
-                            Text(stringResource(R.string.home_coming_later), style = MaterialTheme.typography.bodyMedium)
-                        }
-                    }
+                    // Innholdet kommer utenfra. Forsiden trenger ikke selv kjenne vær-API-et.
+                    weatherContent()
                 }
             }
             item {

@@ -1,6 +1,10 @@
 package no.gruppe7.amate.core.di
 
 import android.content.Context
+import java.io.File
+import no.gruppe7.amate.feature.weather.data.NetworkWeatherRepository
+import no.gruppe7.amate.feature.weather.data.WeatherRepository
+import no.gruppe7.amate.feature.weather.data.remote.MetWeatherApiService
 import androidx.room.Room
 import no.gruppe7.amate.core.database.AmateDatabase
 import no.gruppe7.amate.feature.goals.data.GoalRepository
@@ -17,6 +21,14 @@ import no.gruppe7.amate.feature.water.data.WaterRepository
 // Her oppretter vi felles objekter som resten av appen trenger.
 // I stedet for at hver skjerm bygger sin egen database, henter de ting herfra.
 class AppContainer(context: Context) {
+
+    val weatherRepository: WeatherRepository by lazy {
+        // HTTP-cache er ikke en Room-tabell. Den lagrer nettverkssvar som kan slettes trygt.
+        // Selve nettklienten ordner mellomlagringen på IO når den får en forespørsel.
+        NetworkWeatherRepository(MetWeatherApiService(
+            cacheDirectory = File(context.applicationContext.cacheDir, "weather_http"),
+        ))
+    }
 
     // Lager databasen første gang den faktisk blir brukt.
     // by lazy husker resultatet, så senere bruk får den samme databaseinstansen.

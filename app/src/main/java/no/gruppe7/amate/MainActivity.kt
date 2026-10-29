@@ -17,6 +17,7 @@ import no.gruppe7.amate.feature.water.ui.WaterRoute
 import no.gruppe7.amate.feature.water.ui.rememberWaterViewModel
 import no.gruppe7.amate.feature.reminders.ui.ReminderSettingsRoute
 import no.gruppe7.amate.ui.theme.AmateTheme
+import no.gruppe7.amate.feature.weather.ui.WeatherRoute
 
 class MainActivity : ComponentActivity() {
     // Et varsel kan komme både før skjermen er laget og mens appen allerede er åpen.
@@ -41,6 +42,8 @@ class MainActivity : ComponentActivity() {
                 AmateShell(
                     waterContent = { WaterRoute(container.waterRepository, container.goalRepository) },
                     settingsContent = { ReminderSettingsRoute(container.reminderRepository) },
+                    // Vær kobles bare inn på hjemskjermen. Vann og varsler fungerer som før.
+                    weatherContent = { WeatherRoute(container.weatherRepository) },
                     waterState = waterState,
                     onRetryWater = waterModel::retry,
                     navigationRequest = navigationRequest,

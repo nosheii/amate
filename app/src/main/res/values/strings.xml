@@ -99,8 +99,7 @@
     <string name="home_tagline">Din lille pause i hverdagen</string>
     <string name="home_encouragement">Små steg teller.\nDu gjør det bedre enn du tror.</string>
     <string name="home_greeting">Hei, fint å se deg!</string>
-    <string name="home_preview_note">Vannkortet viser dagens registreringer. De andre kortene kommer senere.</string>
-    <string name="home_weather">Vær og pollen</string>
+    <string name="home_preview_note">Vannkortet viser dagens registreringer. Været vises for Oslo. De andre kortene kommer senere.</string>
     <string name="home_coming_later">Kommer senere</string>
     <string name="home_today">Dagens små mål</string>
     <string name="home_steps">— skritt</string>
