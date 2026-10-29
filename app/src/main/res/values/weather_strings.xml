@@ -1,0 +1,23 @@
+<resources>
+    <string name="weather_title">Vær i %1$s</string>
+    <string name="weather_temperature">%1$s °C</string>
+    <string name="weather_loading">Henter værvarsel…</string>
+    <string name="weather_load_error">Kunne ikke hente været. Sjekk nettet, eller prøv igjen litt senere.</string>
+    <string name="weather_refresh_error">Kunne ikke oppdatere. Viser forrige varsel, som kan være utdatert.</string>
+    <string name="weather_refresh">Oppdater vær</string>
+    <string name="weather_show_details">Vis værdetaljer</string>
+    <string name="weather_hide_details">Skjul værdetaljer</string>
+    <string name="weather_forecast_time">Varsel for %1$s (Oslo-tid)</string>
+    <string name="weather_updated_time">Laget av MET %1$s</string>
+    <string name="weather_source_note">Basert på data fra MET Norway. Forenklet visning. Pollen kommer senere.</string>
+    <string name="weather_source">MET Norway</string>
+    <string name="weather_clear">Klart</string>
+    <string name="weather_partly_cloudy">Lettskyet / delvis skyet</string>
+    <string name="weather_cloudy">Skyet</string>
+    <string name="weather_rain">Regn</string>
+    <string name="weather_snow">Snø</string>
+    <string name="weather_sleet">Sludd</string>
+    <string name="weather_thunder">Tordenvær</string>
+    <string name="weather_fog">Tåke</string>
+    <string name="weather_unknown">Værtype ikke tilgjengelig</string>
+</resources>

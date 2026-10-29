@@ -35,7 +35,7 @@ class HomeScreenTest {
     @Test
     fun homeShowsPlaceholdersInsteadOfPretendUserData() {
         compose.onNodeWithText("Hei, fint å se deg!").assertIsDisplayed()
-        compose.onNodeWithText("Vannkortet viser dagens registreringer. De andre kortene kommer senere.").assertIsDisplayed()
+        compose.onNodeWithText("Vannkortet viser dagens registreringer. Været vises for Oslo. De andre kortene kommer senere.").assertIsDisplayed()
         compose.onNodeWithTag("home_tab_home").assertIsSelected()
     }
 
