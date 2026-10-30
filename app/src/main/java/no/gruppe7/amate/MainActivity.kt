@@ -13,6 +13,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.gruppe7.amate.core.navigation.AppDestination
 import no.gruppe7.amate.core.navigation.AmateShell
+import no.gruppe7.amate.feature.goals.ui.GoalsRoute
 import no.gruppe7.amate.feature.water.ui.WaterRoute
 import no.gruppe7.amate.feature.water.ui.rememberWaterViewModel
 import no.gruppe7.amate.feature.reminders.ui.ReminderSettingsRoute
@@ -44,6 +45,7 @@ class MainActivity : ComponentActivity() {
                     settingsContent = { ReminderSettingsRoute(container.reminderRepository) },
                     // Vær kobles bare inn på hjemskjermen. Vann og varsler fungerer som før.
                     weatherContent = { WeatherRoute(container.weatherRepository) },
+                    goalsContent = { GoalsRoute(container.goalRepository) },
                     waterState = waterState,
                     onRetryWater = waterModel::retry,
                     navigationRequest = navigationRequest,
