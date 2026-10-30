@@ -74,6 +74,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     onOpenWater: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
+    onOpenGoals: () -> Unit = {},
     waterState: WaterUiState = WaterUiState(),
     onRetryWater: () -> Unit = {},
     weatherContent: @Composable () -> Unit = { WeatherCard() },
@@ -171,6 +172,9 @@ fun HomeScreen(
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFAA5B12)),
                         shape = RoundedCornerShape(16.dp), contentPadding = PaddingValues(14.dp)) {
                         Text(stringResource(R.string.home_register_water))
+                    }
+                    TextButton(onClick = onOpenGoals, modifier = Modifier.fillMaxWidth().testTag("home_open_goals")) {
+                        Text(stringResource(R.string.home_open_goals))
                     }
                 }
             }

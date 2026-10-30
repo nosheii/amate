@@ -118,4 +118,6 @@
     <string name="home_settings_title">Innstillinger</string>
     <string name="home_settings_intro">Her finner du vannpåminnelsene. Flere innstillinger kan legges til senere.</string>
     <string name="home_placeholder_body">Her kommer det mer etter hvert. Foreløpig er dette bare et skall, uten personlige data.</string>
+    <string name="home_goals_title">Mine mål</string>
+    <string name="home_open_goals">Endre mål</string>
 </resources>
