@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -28,6 +29,7 @@ class HomeScreenTest {
             AmateShell(
                 waterContent = { Text("Vannside for test") },
                 settingsContent = { Text("Påminnelser for test") },
+                goalsContent = {Text ("Målside for test") },
             )
         }
     }
@@ -45,6 +47,17 @@ class HomeScreenTest {
         compose.onNodeWithTag("home_list").performScrollToNode(hasTestTag("home_open_water"))
         compose.onNodeWithTag("home_open_water").performClick()
         compose.onNodeWithText("Vannside for test").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Tilbake til hjem").performClick()
+        compose.onNodeWithTag("home_settings").assertIsDisplayed()
+    }
+
+    @Test
+    fun goalsShortcutOpensGoalsAndBackReturnHome() {
+        // Lenken ligger nederst i vannkortet, så listen må scrolles dit først.
+        compose.onNodeWithTag("home_list").performScrollToNode(hasTestTag("home_open_goals"))
+        compose.onNodeWithTag("home_open_goals").performClick()
+        compose.onNodeWithText("Mine mål").assertIsDisplayed()
+        compose.onNodeWithText("Målside for test").assertIsDisplayed()
         compose.onNodeWithContentDescription("Tilbake til hjem").performClick()
         compose.onNodeWithTag("home_settings").assertIsDisplayed()
     }
