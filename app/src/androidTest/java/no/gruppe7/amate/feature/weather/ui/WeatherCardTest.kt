@@ -43,7 +43,7 @@ class WeatherCardTest {
         compose.setContent { HomeShellTheme { WeatherCard(WeatherUiState(isLoading = false, forecast = forecast)) } }
         compose.onNodeWithText("Vær i Oslo").assertIsDisplayed()
         compose.onNodeWithText("6,5 °C").assertIsDisplayed()
-        compose.onNodeWithText("Varsel for 27.10 13:00 (Oslo-tid)").assertIsDisplayed()
+        compose.onNodeWithText("Varsel for 27.10 13:00 (CET)").assertIsDisplayed()
         compose.onNodeWithText("MET Norway").assertIsDisplayed()
         compose.onNodeWithText("CC BY 4.0").assertIsDisplayed()
     }
@@ -100,5 +100,48 @@ class WeatherCardTest {
         compose.onNodeWithTag("home_list").performScrollToNode(hasTestTag("weather_card"))
         compose.onNodeWithText("Vær i Oslo").assertIsDisplayed()
         compose.onNodeWithText("6,5 °C").assertIsDisplayed()
+    }
+
+    @Test fun locationRationale_marksOsloAsFallback_andRequestsOnlyWhenTapped() {
+        var requests = 0
+        compose.setContent { HomeShellTheme {
+            WeatherCard(WeatherUiState(isLoading = false, forecast = forecast,
+                locationStatus = WeatherLocationStatus.NEEDS_PERMISSION), onLocationAction = { requests++ })
+        } }
+        compose.onNodeWithText("Oslo er standardsted. Del omtrentlig posisjon med MET for været nær deg.").assertIsDisplayed()
+        compose.runOnIdle { assertEquals(0, requests) }
+        compose.onNodeWithText("Bruk min posisjon").performClick()
+        compose.runOnIdle { assertEquals(1, requests) }
+    }
+
+    @Test fun grantedPosition_hasItsOwnTitleAndNoOsloClaim() {
+        val here = WeatherPlace("din posisjon", 60.39, 5.32, java.time.ZoneId.of("UTC"), isCurrentLocation = true)
+        compose.setContent { HomeShellTheme {
+            WeatherCard(WeatherUiState(place = here, isLoading = false,
+                forecast = forecast.copy(place = here), locationStatus = WeatherLocationStatus.CURRENT))
+        } }
+        compose.onNodeWithText("Vær der du er").assertIsDisplayed()
+        compose.onNodeWithText("Vær i Oslo").assertDoesNotExist()
+        compose.onNodeWithText("Omtrentlig posisjon · telefonens tidssone").assertIsDisplayed()
+        compose.onNodeWithText("Varsel for 27.10 12:00 (UTC)").assertIsDisplayed()
+        compose.onNodeWithTag("weather_location_action").assertDoesNotExist()
+    }
+
+    @Test fun locationProblems_offerTheMatchingAction_andLoadingCannotBeRefreshed() {
+        val state = mutableStateOf(WeatherUiState(isLoading = false,
+            locationStatus = WeatherLocationStatus.DENIED))
+        compose.setContent { HomeShellTheme { WeatherCard(state.value) } }
+        compose.onNodeWithText("Bruk min posisjon").assertIsDisplayed()
+        compose.runOnIdle { state.value = state.value.copy(locationStatus = WeatherLocationStatus.SETTINGS_REQUIRED) }
+        compose.onNodeWithText("Åpne apptillatelser").assertIsDisplayed()
+        compose.runOnIdle { state.value = state.value.copy(locationStatus = WeatherLocationStatus.DISABLED) }
+        compose.onNodeWithText("Slå på posisjon").assertIsDisplayed()
+        compose.runOnIdle { state.value = state.value.copy(locationStatus = WeatherLocationStatus.UNAVAILABLE) }
+        compose.onNodeWithText("Prøv posisjon igjen").assertIsDisplayed()
+        compose.runOnIdle { state.value = state.value.copy(locationStatus = WeatherLocationStatus.LOCATING) }
+        compose.onNodeWithText("Finner omtrentlig posisjon…").assertIsDisplayed()
+        compose.onNodeWithTag("weather_refresh").assertIsNotEnabled()
+        compose.onNodeWithTag("weather_location_action").assertDoesNotExist()
+        compose.onNodeWithTag("weather_temperature").assertDoesNotExist()
     }
 }
