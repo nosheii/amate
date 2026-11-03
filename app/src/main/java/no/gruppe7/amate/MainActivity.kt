@@ -49,7 +49,7 @@ class MainActivity : ComponentActivity() {
                     stepsContent = { StepsRoute(container.stepsRepository, container.goalRepository, onOpenGoals = { navigationRequest = AppDestination.GOALS }) },
                     settingsContent = { ReminderSettingsRoute(container.reminderRepository) },
                     // Vær kobles bare inn på hjemskjermen. Vann og varsler fungerer som før.
-                    weatherContent = { WeatherRoute(container.weatherRepository) },
+                    weatherContent = { WeatherRoute(container.weatherRepository, container.weatherLocation) },
                     goalsContent = { GoalsRoute(container.goalRepository) },
                     waterState = waterState,
                     stepsState = stepsState,

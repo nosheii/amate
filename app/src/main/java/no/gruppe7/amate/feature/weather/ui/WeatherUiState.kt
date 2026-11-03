@@ -9,4 +9,10 @@ data class WeatherUiState(
     val isLoading: Boolean = true,
     val forecast: WeatherForecast? = null,
     val loadFailed: Boolean = false,
+    // null lar kortet brukes alene i forhåndsvisninger uten Android-tillatelser.
+    val locationStatus: WeatherLocationStatus? = null,
 )
+
+enum class WeatherLocationStatus {
+    NEEDS_PERMISSION, DENIED, SETTINGS_REQUIRED, LOCATING, CURRENT, DISABLED, UNAVAILABLE,
+}
