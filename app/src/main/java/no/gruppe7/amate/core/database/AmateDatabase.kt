@@ -11,6 +11,8 @@ import no.gruppe7.amate.feature.reminders.data.local.ReminderDao
 import no.gruppe7.amate.feature.reminders.data.local.ReminderEntity
 import no.gruppe7.amate.feature.reminders.data.local.ReminderDeliveryEntity
 import no.gruppe7.amate.feature.reminders.data.local.ReminderDeliveryDao
+import no.gruppe7.amate.feature.steps.data.local.DailyStepsEntity
+import no.gruppe7.amate.feature.steps.data.local.StepsDao
 
 // Dette er hoveddatabasen til appen.
 // Her registrerer vi tabellene og DAO-ene som Room skal kjenne til.
@@ -23,10 +25,11 @@ import no.gruppe7.amate.feature.reminders.data.local.ReminderDeliveryDao
         ReminderDeliveryEntity::class,
         GoalEntity::class,
         SelfCareTaskEntity::class,
+        DailyStepsEntity::class,
     ],
 
-    // main var på 3. Den samlede versjonen med mål og gjøremål blir derfor 4.
-    version = 4,
+    // main var på 3. Den samlede versjonen med mål og gjøremål var 4. Skritt i v5.
+    version = 5,
     exportSchema = false,
 )
 abstract class AmateDatabase : RoomDatabase() {
@@ -42,4 +45,7 @@ abstract class AmateDatabase : RoomDatabase() {
 
     // Tilgang til huskelappen som hindrer gjentatte sendeforsøk for samme tidspunkt.
     abstract fun reminderDeliveryDao(): ReminderDeliveryDao
+
+    // Tilgang til skrittdata.
+    abstract fun stepsDao(): StepsDao
 }

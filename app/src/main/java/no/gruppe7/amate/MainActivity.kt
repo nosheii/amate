@@ -14,6 +14,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.gruppe7.amate.core.navigation.AppDestination
 import no.gruppe7.amate.core.navigation.AmateShell
 import no.gruppe7.amate.feature.goals.ui.GoalsRoute
+import no.gruppe7.amate.feature.steps.ui.StepsRoute
+import no.gruppe7.amate.feature.steps.ui.rememberStepsViewModel
 import no.gruppe7.amate.feature.water.ui.WaterRoute
 import no.gruppe7.amate.feature.water.ui.rememberWaterViewModel
 import no.gruppe7.amate.feature.reminders.ui.ReminderSettingsRoute
@@ -39,14 +41,18 @@ class MainActivity : ComponentActivity() {
                 // Samme modell brukes på begge sider. Den følger både vannloggen og Najmas mål.
                 val waterModel = rememberWaterViewModel(container.waterRepository, container.goalRepository)
                 val waterState by waterModel.uiState.collectAsStateWithLifecycle()
+                val stepsModel = rememberStepsViewModel(container.stepsRepository, container.goalRepository)
+                val stepsState by stepsModel.uiState.collectAsStateWithLifecycle()
                 LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { waterModel.refreshDay() }
                 AmateShell(
                     waterContent = { WaterRoute(container.waterRepository, container.goalRepository) },
+                    stepsContent = { StepsRoute(container.stepsRepository, container.goalRepository, onOpenGoals = { navigationRequest = AppDestination.GOALS }) },
                     settingsContent = { ReminderSettingsRoute(container.reminderRepository) },
                     // Vær kobles bare inn på hjemskjermen. Vann og varsler fungerer som før.
                     weatherContent = { WeatherRoute(container.weatherRepository) },
                     goalsContent = { GoalsRoute(container.goalRepository) },
                     waterState = waterState,
+                    stepsState = stepsState,
                     onRetryWater = waterModel::retry,
                     navigationRequest = navigationRequest,
                     onNavigationHandled = {

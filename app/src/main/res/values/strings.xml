@@ -120,4 +120,22 @@
     <string name="home_placeholder_body">Her kommer det mer etter hvert. Foreløpig er dette bare et skall, uten personlige data.</string>
     <string name="home_goals_title">Mine mål</string>
     <string name="home_open_goals">Endre mål</string>
+
+    <!-- Skritteller -->
+    <string name="steps_title">Skritteller</string>
+    <string name="steps_today_heading">Skritt i dag</string>
+    <string name="steps_count_format">%1$s skritt</string>
+    <string name="steps_goal_summary">Mål: %1$s skritt om dagen</string>
+    <string name="steps_no_goal">Ingen dagsmål er satt</string>
+    <string name="steps_sensor_available">Skritt-sensor er aktiv på enheten</string>
+    <string name="steps_sensor_unavailable">Ingen fysisk skritt-sensor funnet på denne enheten (bruk testknapper)</string>
+    <string name="steps_permission_required">Skrittelleren trenger tilgang til fysisk aktivitet for å telle skrittene dine automatisk.</string>
+    <string name="steps_grant_permission">Gi tilgang til aktivitet</string>
+    <string name="steps_permission_granted">Tilgang til aktivitet er gitt</string>
+    <string name="steps_manual_test_title">Test skritteller</string>
+    <string name="steps_add_100">+100 skritt</string>
+    <string name="steps_add_1000">+1 000 skritt</string>
+    <string name="steps_history_title">Tidligere dager</string>
+    <string name="steps_history_empty">Ingen tidligere skrittdata registrert ennå.</string>
+    <string name="steps_edit_goal">Endre mål</string>
 </resources>
