@@ -46,6 +46,7 @@ import no.gruppe7.amate.feature.weather.ui.WeatherCard
 fun AmateShell(
     waterContent: @Composable () -> Unit,
     settingsContent: @Composable () -> Unit,
+    goalsContent: @Composable () -> Unit = {},
     waterState: WaterUiState = WaterUiState(),
     onRetryWater: () -> Unit = {},
     navigationRequest: AppDestination? = null,
@@ -89,7 +90,7 @@ fun AmateShell(
                     listOf(AppDestination.HOME, AppDestination.PROGRESS, AppDestination.PROFILE).forEach { tab ->
                         NavigationBarItem(
                             selected = if (tab == AppDestination.HOME) {
-                                destination in listOf(AppDestination.HOME, AppDestination.WATER, AppDestination.SETTINGS)
+                                destination in listOf(AppDestination.HOME, AppDestination.WATER, AppDestination.SETTINGS, AppDestination.GOALS)
                             } else destination == tab,
                             onClick = { destination = tab },
                             icon = { Icon(when (tab) {
@@ -116,11 +117,13 @@ fun AmateShell(
                     AppDestination.HOME -> HomeScreen(
                         onOpenWater = { destination = AppDestination.WATER },
                         onOpenSettings = { destination = AppDestination.SETTINGS },
+                        onOpenGoals = { destination = AppDestination.GOALS },
                         waterState = waterState,
                         onRetryWater = onRetryWater,
                         weatherContent = weatherContent,
                     )
                     AppDestination.WATER -> waterContent()
+                    AppDestination.GOALS -> goalsContent()
                     AppDestination.SETTINGS -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
                         Column(Modifier.widthIn(max = 600.dp).fillMaxSize().verticalScroll(rememberScrollState())
                             .padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -153,5 +156,6 @@ private fun AppDestination.title(): Int = when (this) {
     AppDestination.PROFILE -> R.string.home_nav_profile
     AppDestination.WATER -> R.string.home_water_title
     AppDestination.SETTINGS -> R.string.home_settings_title
+    AppDestination.GOALS -> R.string.goals_title
     else -> R.string.home_nav_home
 }
