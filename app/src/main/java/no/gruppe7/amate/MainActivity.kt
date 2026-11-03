@@ -1,11 +1,14 @@
 package no.gruppe7.amate
 
 import android.os.Bundle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import no.gruppe7.amate.core.navigation.AmateShell
 import no.gruppe7.amate.feature.water.ui.WaterRoute
+import no.gruppe7.amate.feature.profile.ui.ProfileViewModel
+import no.gruppe7.amate.feature.profile.ui.ProfileRoute
 import no.gruppe7.amate.feature.reminders.ui.ReminderSettingsRoute
 import no.gruppe7.amate.ui.theme.AmateTheme
 
@@ -21,6 +24,12 @@ class MainActivity : ComponentActivity() {
                 AmateShell(
                     waterContent = { WaterRoute(repository = container.waterRepository) },
                     settingsContent = { ReminderSettingsRoute(container.reminderRepository) },
+                    profileContent = {
+                        val viewModel: ProfileViewModel = viewModel(
+                            factory = ProfileViewModel.factory(container.profileRepository)
+                        )
+                        ProfileRoute(viewModel = viewModel)
+                    },
                 )
             }
         }

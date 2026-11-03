@@ -1,7 +1,11 @@
 package no.gruppe7.amate.feature.profile.data.local
 
-/** TODO: Definer valgbare avatar-egenskaper. */
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "avatar_config")
 data class AvatarConfigEntity(
+    @PrimaryKey
     val userId: Long = 0,
     val avatarKey: String = "",
 )

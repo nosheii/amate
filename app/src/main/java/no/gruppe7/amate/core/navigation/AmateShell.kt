@@ -43,6 +43,7 @@ import no.gruppe7.amate.feature.home.ui.HomeShellTheme
 fun AmateShell(
     waterContent: @Composable () -> Unit,
     settingsContent: @Composable () -> Unit,
+    profileContent: @Composable () -> Unit,
 ) {
     // En liten, midlertidig skjermvelger, ikke gruppas ferdige navigasjonsløsning.
     // rememberSaveable beholder valgt skjerm ved for eksempel rotasjon av telefonen.
@@ -102,6 +103,7 @@ fun AmateShell(
                         onOpenSettings = { destination = AppDestination.SETTINGS },
                     )
                     AppDestination.WATER -> waterContent()
+                    AppDestination.PROFILE -> profileContent()
                     AppDestination.SETTINGS -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
                         Column(Modifier.widthIn(max = 600.dp).fillMaxSize().verticalScroll(rememberScrollState())
                             .padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {

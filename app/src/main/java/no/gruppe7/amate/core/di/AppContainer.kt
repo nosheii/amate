@@ -3,6 +3,8 @@ package no.gruppe7.amate.core.di
 import android.content.Context
 import androidx.room.Room
 import no.gruppe7.amate.core.database.AmateDatabase
+import no.gruppe7.amate.feature.profile.data.ProfileRepository
+import no.gruppe7.amate.feature.profile.data.RoomProfileRepository
 import no.gruppe7.amate.feature.goals.data.GoalRepository
 import no.gruppe7.amate.feature.goals.data.RoomGoalRepository
 import no.gruppe7.amate.core.database.ALL_DATABASE_MIGRATIONS
@@ -29,6 +31,14 @@ class AppContainer(context: Context) {
             AmateDatabase::class.java,
             "amate_database",
         ).addMigrations(*ALL_DATABASE_MIGRATIONS).build()
+    }
+
+    //Profil og avatar dleer database med resten av appen, men har sin egen
+    // DAO per tabell og ett felles repository som håndterer begge.
+    val userProfileDao by lazy { database.userProfileDao() }
+    val avatarConfigDao by lazy { database.avatarConfigDao() }
+    val profileRepository: ProfileRepository by lazy {
+        RoomProfileRepository(userProfileDao, avatarConfigDao)
     }
 
     // Gir enkel tilgang til WaterDao.
