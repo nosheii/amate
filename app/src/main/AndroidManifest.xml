@@ -2,8 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Vanlig nettilgang, ikke en tillatelse brukeren må svare på. Ingen posisjon hentes. -->
+    <!-- Nettilgang til MET. Omtrentlig posisjon spør vi om først når brukeren velger det. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Været trenger ikke nøyaktig GPS eller tilgang i bakgrunnen. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application

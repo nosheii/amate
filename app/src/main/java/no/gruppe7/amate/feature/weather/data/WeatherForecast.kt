@@ -3,9 +3,15 @@ package no.gruppe7.amate.feature.weather.data
 import java.time.Instant
 import java.time.ZoneId
 
-// Første runde bruker ett fast sted. Vi spør ikke om telefonens posisjon.
-// Når stedvelgeren kommer, kan vi sende inn et annet sted gjennom samme kobling.
-data class WeatherPlace(val name: String, val latitude: Double, val longitude: Double, val zone: ZoneId) {
+// Oslo er et tydelig merket standardsted hvis brukeren ikke kan/vil dele posisjon.
+// Vi lager ingen Room-tabell med posisjonshistorikk. Værklienten har vanlig HTTP-cache.
+data class WeatherPlace(
+    val name: String,
+    val latitude: Double,
+    val longitude: Double,
+    val zone: ZoneId,
+    val isCurrentLocation: Boolean = false,
+) {
     companion object {
         val OSLO = WeatherPlace("Oslo", 59.9139, 10.7522, ZoneId.of("Europe/Oslo"))
     }
