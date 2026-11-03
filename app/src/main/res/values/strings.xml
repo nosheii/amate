@@ -95,6 +95,29 @@
     <string name="reminders_test_blocked">Testvarselet ble ikke sendt fordi varsler er blokkert. Åpne varselinnstillingene og tillat vannpåminnelser.</string>
     <string name="reminders_test_notification_title">Amate – testvarsel</string>
     <string name="reminders_test_notification_body">Dette er bare en test. Trykk her for å åpne Amate.</string>
+
+    <!--- Gjøremål -->
+    <string name="tasks_title">Dagens gjøremål</string>
+    <string name="tasks_progress_of">av</string>
+    <string name="tasks_progress_done">gjort</string>
+    <string name="tasks_all_done">Alt gjort for i dag</string>
+    <string name="tasks_add">Legg til gjøremål</string>
+    <string name="tasks_add_title">Nytt gjøremål</string>
+    <string name="tasks_edit_title">Rediger gjøremål</string>
+    <string name="tasks_title_label">Hva vil du gjøre?</string>
+    <string name="tasks_edit">Rediger</string>
+    <string name="tasks_delete">Slett</string>
+    <string name="tasks_toggle_description">Marker som har blitt gjort</string>
+    <string name="tasks_edit_description">Rediger </string>
+    <string name="tasks_delete_description">Slett</string>
+    <string name="tasks_empty_title">Ingenting planlagt ennå</string>
+    <string name="tasks_empty_body">Legg til ett lite gjøremål for i dag. Det holder.</string>
+    <string name="tasks_invalid_title">Skriv en kort tekst, maks 60 tegn.</string>
+    <string name="tasks_load_error">Kunne ikke hente gjøremålene. Prøv igjen.</string>
+    <string name="tasks_save_error">Endringen ble ikke lagret. Prøv igjen.</string>
+    <string name="tasks_loading">Henter gjøremål...</string>
+    <string name="home_tasks_title">Gjøremål</string>
+
     <!-- Enkelt hjemmeskall. Streker er plassholdere, ikke ekte registreringer. -->
     <string name="home_tagline">Din lille pause i hverdagen</string>
     <string name="home_encouragement">Små steg teller.\nDu gjør det bedre enn du tror.</string>

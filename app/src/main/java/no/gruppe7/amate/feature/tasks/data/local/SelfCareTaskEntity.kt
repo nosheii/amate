@@ -4,6 +4,8 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 /** TODO: Legg til Room Entity og felt for planlegging/fullforing. */
+// En rad i tabellen self_care_tasks = ett gjøremål, f.eks. "Gå en tur."
+// Feltene må matche MIGRATION_3_4 nøyaktig. Nye felt krever ny databaseversjon og migrering
 @Entity (tableName = "self_care_tasks")
 data class SelfCareTaskEntity(
     @PrimaryKey(autoGenerate = true)

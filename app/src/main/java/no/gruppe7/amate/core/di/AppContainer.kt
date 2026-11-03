@@ -17,6 +17,8 @@ import no.gruppe7.amate.feature.reminders.data.ReminderRepository
 import no.gruppe7.amate.feature.reminders.data.RoomReminderRepository
 import no.gruppe7.amate.feature.water.data.RoomWaterRepository
 import no.gruppe7.amate.feature.water.data.WaterRepository
+import no.gruppe7.amate.feature.tasks.data.RoomTaskRepository
+import no.gruppe7.amate.feature.tasks.data.TaskRepository
 
 // Her oppretter vi felles objekter som resten av appen trenger.
 // I stedet for at hver skjerm bygger sin egen database, henter de ting herfra.
@@ -55,6 +57,11 @@ class AppContainer(context: Context) {
     // Mål får sin egen DAO og sitt eget repository, men deler database med vann/påminnelser.
     val goalDao by lazy { database.goalDao() }
     val goalRepository: GoalRepository by lazy { RoomGoalRepository(goalDao) }
+
+    // Gjøremål deler database med resten, men har egen DAO og eget repository
+    val taskDao by lazy {database.selfCareTaskDao()}
+
+    val taskRepository: TaskRepository by lazy { RoomTaskRepository(taskDao) }
 
     // Android-delen lager kanalen, sjekker tillatelse og viser/fjerner varsler.
     val waterReminderNotifications by lazy { WaterReminderNotifications(context) }

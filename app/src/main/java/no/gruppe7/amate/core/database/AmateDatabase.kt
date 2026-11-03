@@ -5,6 +5,7 @@ import androidx.room.RoomDatabase
 import no.gruppe7.amate.feature.goals.data.local.GoalDao
 import no.gruppe7.amate.feature.goals.data.local.GoalEntity
 import no.gruppe7.amate.feature.tasks.data.local.SelfCareTaskEntity
+import no.gruppe7.amate.feature.tasks.data.local.SelfCareTaskDao
 import no.gruppe7.amate.feature.water.data.local.WaterDao
 import no.gruppe7.amate.feature.water.data.local.WaterEntryEntity
 import no.gruppe7.amate.feature.reminders.data.local.ReminderDao
@@ -36,6 +37,9 @@ abstract class AmateDatabase : RoomDatabase() {
 
     // Gir resten av appen tilgang til funksjonene i GoalDao.
     abstract fun goalDao(): GoalDao
+
+    // Gir resten av appen tilgang til funksjonen i SelfCareTaskDao
+    abstract fun selfCareTaskDao(): SelfCareTaskDao
 
     // Tilgang til brukerens lagrede påminnelsesvalg.
     abstract fun reminderDao(): ReminderDao
