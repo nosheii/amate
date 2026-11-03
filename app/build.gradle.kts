@@ -37,9 +37,16 @@ android {
 }
 
 dependencies {
+    // WorkManager lar Android kjøre vannpåminnelser selv om skjermen er lukket.
+    implementation(libs.androidx.work.runtime)
+    androidTestImplementation(libs.androidx.work.testing)
+    androidTestImplementation(libs.androidx.test.rules)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
+    // Ferdige Material-ikoner. Compose-BOM-en over styrer versjonen, som for resten av Compose.
+    // Stort ikonsett: før lansering bør et releasebygg bruke R8 til å fjerne ubrukte ikoner.
+    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
@@ -58,5 +65,7 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+    // Migreringstesten bygger også en gammel Room-database i androidTest.
+    add("kspAndroidTest", libs.androidx.room.compiler)
     androidTestImplementation(libs.androidx.room.testing)
 }

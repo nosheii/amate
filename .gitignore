@@ -1,5 +1,7 @@
 *.iml
 .gradle
+# Kotlin lager denne hurtigbufferen selv. Den skal ikke med i en commit.
+/.kotlin/
 /local.properties
 /.idea/caches
 /.idea/libraries
