@@ -7,16 +7,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Cloud
-import androidx.compose.material.icons.rounded.CloudOff
 import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material.icons.rounded.ExpandMore
-import androidx.compose.material.icons.rounded.Grain
-import androidx.compose.material.icons.rounded.NightsStay
 import androidx.compose.material.icons.rounded.Refresh
-import androidx.compose.material.icons.rounded.Thunderstorm
-import androidx.compose.material.icons.rounded.WaterDrop
-import androidx.compose.material.icons.rounded.WbSunny
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,7 +35,11 @@ import java.util.Locale
 import no.gruppe7.amate.R
 
 @Composable
-fun WeatherCard(state: WeatherUiState = WeatherUiState(), onRefresh: () -> Unit = {}) {
+fun WeatherCard(
+    state: WeatherUiState = WeatherUiState(),
+    onRefresh: () -> Unit = {},
+    onLocationAction: () -> Unit = {},
+) {
     val uriHandler = LocalUriHandler.current
     // Det viktigste står fremme. Resten kan åpnes i kortet uten en egen side eller popup.
     var detailsOpen by rememberSaveable { mutableStateOf(false) }
@@ -53,39 +50,41 @@ fun WeatherCard(state: WeatherUiState = WeatherUiState(), onRefresh: () -> Unit 
         DateTimeFormatter.ofPattern("dd.MM HH:mm", Locale.forLanguageTag("nb-NO")).withZone(state.place.zone)
     }
     val forecast = state.forecast
+    val locating = state.locationStatus == WeatherLocationStatus.LOCATING
     Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.testTag("weather_card")) {
         // Sted, værtype og temperatur deler én rad. Oppdatering har en liten knapp helt til høyre.
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (forecast != null) {
-                val condition = conditionFor(forecast.symbolCode)
-                Icon(when (condition) {
-                    R.string.weather_clear -> if (forecast.symbolCode?.endsWith("_night") == true) Icons.Rounded.NightsStay else Icons.Rounded.WbSunny
-                    R.string.weather_rain, R.string.weather_sleet -> Icons.Rounded.WaterDrop
-                    R.string.weather_snow -> Icons.Rounded.Grain
-                    R.string.weather_thunder -> Icons.Rounded.Thunderstorm
-                    R.string.weather_unknown -> Icons.Rounded.CloudOff
-                    else -> Icons.Rounded.Cloud
-                }, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(28.dp))
+                // Bare symbolet byttes. Temperatur, tekst og ekte værdata påvirkes ikke.
+                WeatherIcon(forecast.symbolCode, animate = !state.isLoading && !state.loadFailed,
+                    modifier = Modifier.size(36.dp))
             }
             Column(Modifier.weight(1f)) {
-                Text(stringResource(R.string.weather_title, state.place.name), fontWeight = FontWeight.Bold,
+                val title = if (state.place.isCurrentLocation || locating) stringResource(R.string.weather_here)
+                    else stringResource(R.string.weather_title, state.place.name)
+                Text(title, fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.titleSmall)
                 if (forecast != null) Text(stringResource(conditionFor(forecast.symbolCode)),
-                    style = MaterialTheme.typography.bodySmall)
+                    style = MaterialTheme.typography.bodySmall, modifier = Modifier.testTag("weather_current_condition"))
             }
             if (forecast != null) {
                 Text(stringResource(R.string.weather_temperature, numbers.format(forecast.temperatureCelsius)),
                     style = MaterialTheme.typography.headlineSmall, modifier = Modifier.testTag("weather_temperature"))
             }
-            IconButton(onClick = onRefresh, enabled = !state.isLoading, modifier = Modifier.testTag("weather_refresh")) {
+            IconButton(onClick = onRefresh, enabled = !state.isLoading && !locating, modifier = Modifier.testTag("weather_refresh")) {
                 Icon(Icons.Rounded.Refresh, contentDescription = stringResource(R.string.weather_refresh))
             }
         }
         if (forecast != null) {
             // Varseltiden er alltid synlig. Et gammelt varsel skal ikke se ut som en måling akkurat nå.
-            Text(stringResource(R.string.weather_forecast_time, time.format(forecast.forecastAt)),
+            val zoneLabel = remember(state.place, forecast.forecastAt) {
+                DateTimeFormatter.ofPattern("z", Locale.forLanguageTag("nb-NO"))
+                    .withZone(state.place.zone).format(forecast.forecastAt)
+            }
+            Text(stringResource(R.string.weather_forecast_time, time.format(forecast.forecastAt), zoneLabel),
                 style = MaterialTheme.typography.bodySmall)
         }
+        state.locationStatus?.let { WeatherLocationControls(it, onLocationAction) }
         if (state.isLoading) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 CircularProgressIndicator(Modifier.size(20.dp))
@@ -121,6 +120,8 @@ fun WeatherCard(state: WeatherUiState = WeatherUiState(), onRefresh: () -> Unit 
                 if (forecast != null) Text(stringResource(R.string.weather_updated_time, time.format(forecast.updatedAt)),
                     style = MaterialTheme.typography.bodySmall)
                 Text(stringResource(R.string.weather_source_note), style = MaterialTheme.typography.bodySmall)
+                if (state.locationStatus != null) Text(stringResource(R.string.weather_location_privacy),
+                    style = MaterialTheme.typography.bodySmall)
             }
         }
     }

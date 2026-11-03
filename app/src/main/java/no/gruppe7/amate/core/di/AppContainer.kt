@@ -5,6 +5,8 @@ import java.io.File
 import no.gruppe7.amate.feature.weather.data.NetworkWeatherRepository
 import no.gruppe7.amate.feature.weather.data.WeatherRepository
 import no.gruppe7.amate.feature.weather.data.remote.MetWeatherApiService
+import no.gruppe7.amate.feature.weather.location.AndroidLocationDataSource
+import no.gruppe7.amate.feature.weather.location.LocationDataSource
 import androidx.room.Room
 import no.gruppe7.amate.core.database.AmateDatabase
 import no.gruppe7.amate.feature.goals.data.GoalRepository
@@ -23,6 +25,9 @@ import no.gruppe7.amate.feature.tasks.data.TaskRepository
 // Her oppretter vi felles objekter som resten av appen trenger.
 // I stedet for at hver skjerm bygger sin egen database, henter de ting herfra.
 class AppContainer(context: Context) {
+
+    // Bare en engangsforespørsel når værkortet trenger posisjonen. Starter ingen sporing her.
+    val weatherLocation: LocationDataSource by lazy { AndroidLocationDataSource(context) }
 
     val weatherRepository: WeatherRepository by lazy {
         // HTTP-cache er ikke en Room-tabell. Den lagrer nettverkssvar som kan slettes trygt.

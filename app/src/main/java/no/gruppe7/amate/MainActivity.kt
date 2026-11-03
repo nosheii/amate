@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
                     waterContent = { WaterRoute(container.waterRepository, container.goalRepository) },
                     settingsContent = { ReminderSettingsRoute(container.reminderRepository) },
                     // Vær kobles bare inn på hjemskjermen. Vann og varsler fungerer som før.
-                    weatherContent = { WeatherRoute(container.weatherRepository) },
+                    weatherContent = { WeatherRoute(container.weatherRepository, container.weatherLocation) },
                     goalsContent = { GoalsRoute(container.goalRepository) },
                     waterState = waterState,
                     onRetryWater = waterModel::retry,
