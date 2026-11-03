@@ -1,0 +1,36 @@
+<resources>
+    <string name="weather_title">Vær i %1$s</string>
+    <string name="weather_here">Vær der du er</string>
+    <string name="weather_location_intro">Oslo er standardsted. Del omtrentlig posisjon med MET for været nær deg.</string>
+    <string name="weather_location_denied">Posisjon er ikke tillatt. Viser Oslo som standardsted.</string>
+    <string name="weather_location_settings_required">Posisjon er ikke tillatt. Du kan gi tilgang i Android-innstillingene. Viser Oslo som standardsted.</string>
+    <string name="weather_location_loading">Finner omtrentlig posisjon…</string>
+    <string name="weather_location_current">Omtrentlig posisjon · telefonens tidssone</string>
+    <string name="weather_location_disabled">Posisjon er slått av på telefonen. Viser Oslo som standardsted.</string>
+    <string name="weather_location_unavailable">Fant ikke posisjonen. Viser Oslo som standardsted. Prøv igjen, eller sjekk posisjonsinnstillingene.</string>
+    <string name="weather_location_use_mine">Bruk min posisjon</string>
+    <string name="weather_location_retry">Prøv posisjon igjen</string>
+    <string name="weather_location_open_permissions">Åpne apptillatelser</string>
+    <string name="weather_location_enable_services">Slå på posisjon</string>
+    <string name="weather_location_privacy">Omtrentlig posisjon sendes til MET Norway for å hente været. Vi følger deg ikke i bakgrunnen og lagrer ingen posisjonshistorikk i Room. Nettverkssvar kan mellomlagres på telefonen. Du kan fjerne tilgangen i Android-innstillingene.</string>
+    <string name="weather_temperature">%1$s °C</string>
+    <string name="weather_loading">Henter værvarsel…</string>
+    <string name="weather_load_error">Kunne ikke hente været. Sjekk nettet, eller prøv igjen litt senere.</string>
+    <string name="weather_refresh_error">Kunne ikke oppdatere. Viser forrige varsel, som kan være utdatert.</string>
+    <string name="weather_refresh">Oppdater vær</string>
+    <string name="weather_show_details">Vis værdetaljer</string>
+    <string name="weather_hide_details">Skjul værdetaljer</string>
+    <string name="weather_forecast_time">Varsel for %1$s (%2$s)</string>
+    <string name="weather_updated_time">Laget av MET %1$s</string>
+    <string name="weather_source_note">Basert på data fra MET Norway. Forenklet visning. Pollen kommer senere.</string>
+    <string name="weather_source">MET Norway</string>
+    <string name="weather_clear">Klart</string>
+    <string name="weather_partly_cloudy">Lettskyet / delvis skyet</string>
+    <string name="weather_cloudy">Skyet</string>
+    <string name="weather_rain">Regn</string>
+    <string name="weather_snow">Snø</string>
+    <string name="weather_sleet">Sludd</string>
+    <string name="weather_thunder">Tordenvær</string>
+    <string name="weather_fog">Tåke</string>
+    <string name="weather_unknown">Værtype ikke tilgjengelig</string>
+</resources>

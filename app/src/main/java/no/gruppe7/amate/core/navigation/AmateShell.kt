@@ -23,6 +23,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -38,17 +39,36 @@ import no.gruppe7.amate.R
 import no.gruppe7.amate.feature.home.ui.HomeIcons
 import no.gruppe7.amate.feature.home.ui.HomeScreen
 import no.gruppe7.amate.feature.home.ui.HomeShellTheme
+import no.gruppe7.amate.feature.steps.ui.StepsUiState
+import no.gruppe7.amate.feature.water.ui.WaterUiState
+import no.gruppe7.amate.feature.weather.ui.WeatherCard
 
 @Composable
 fun AmateShell(
     waterContent: @Composable () -> Unit,
     settingsContent: @Composable () -> Unit,
     profileContent: @Composable () -> Unit,
+    goalsContent: @Composable () -> Unit = {},
+    stepsContent: @Composable () -> Unit = {},
+    waterState: WaterUiState = WaterUiState(),
+    stepsState: StepsUiState = StepsUiState(),
+    onRetryWater: () -> Unit = {},
+    navigationRequest: AppDestination? = null,
+    onNavigationHandled: () -> Unit = {},
+    weatherContent: @Composable () -> Unit = { WeatherCard() },
 ) {
     // En liten, midlertidig skjermvelger, ikke gruppas ferdige navigasjonsløsning.
     // rememberSaveable beholder valgt skjerm ved for eksempel rotasjon av telefonen.
     // Innholdet sendes inn, så selve skallet ikke trenger en database eller AppContainer.
     var destination by rememberSaveable { mutableStateOf(AppDestination.HOME) }
+    LaunchedEffect(navigationRequest) {
+        navigationRequest?.let {
+            destination = it
+            // Varselet er en engangsbeskjed, ikke en fast startside. Etterpå kan vi gå hjem igjen
+            // uten at hver ny opptegning eller rotasjon sender oss tilbake til vannskjermen.
+            onNavigationHandled()
+        }
+    }
     val goHome = { destination = AppDestination.HOME }
     BackHandler(enabled = destination != AppDestination.HOME, onBack = goHome)
 
@@ -74,7 +94,7 @@ fun AmateShell(
                     listOf(AppDestination.HOME, AppDestination.PROGRESS, AppDestination.PROFILE).forEach { tab ->
                         NavigationBarItem(
                             selected = if (tab == AppDestination.HOME) {
-                                destination in listOf(AppDestination.HOME, AppDestination.WATER, AppDestination.SETTINGS)
+                                destination in listOf(AppDestination.HOME, AppDestination.WATER, AppDestination.STEPS, AppDestination.SETTINGS, AppDestination.GOALS)
                             } else destination == tab,
                             onClick = { destination = tab },
                             icon = { Icon(when (tab) {
@@ -101,9 +121,17 @@ fun AmateShell(
                     AppDestination.HOME -> HomeScreen(
                         onOpenWater = { destination = AppDestination.WATER },
                         onOpenSettings = { destination = AppDestination.SETTINGS },
+                        onOpenGoals = { destination = AppDestination.GOALS },
+                        onOpenSteps = { destination = AppDestination.STEPS },
+                        waterState = waterState,
+                        stepsState = stepsState,
+                        onRetryWater = onRetryWater,
+                        weatherContent = weatherContent,
                     )
                     AppDestination.WATER -> waterContent()
                     AppDestination.PROFILE -> profileContent()
+                    AppDestination.STEPS -> stepsContent()
+                    AppDestination.GOALS -> goalsContent()
                     AppDestination.SETTINGS -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
                         Column(Modifier.widthIn(max = 600.dp).fillMaxSize().verticalScroll(rememberScrollState())
                             .padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -135,6 +163,8 @@ private fun AppDestination.title(): Int = when (this) {
     AppDestination.PROGRESS -> R.string.home_nav_progress
     AppDestination.PROFILE -> R.string.home_nav_profile
     AppDestination.WATER -> R.string.home_water_title
+    AppDestination.STEPS -> R.string.steps_title
     AppDestination.SETTINGS -> R.string.home_settings_title
+    AppDestination.GOALS -> R.string.goals_title
     else -> R.string.home_nav_home
 }

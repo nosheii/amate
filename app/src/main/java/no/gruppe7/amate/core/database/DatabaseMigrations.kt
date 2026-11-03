@@ -90,6 +90,45 @@ val MIGRATION_2_4 = object : Migration(2, 4) {
     }
 }
 
+// Versjon 5 legger til skrittelling i daily_steps tabellen.
+val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS daily_steps (
+                userId INTEGER NOT NULL,
+                epochDay INTEGER NOT NULL,
+                stepCount INTEGER NOT NULL,
+                PRIMARY KEY(userId, epochDay)
+            )
+            """.trimIndent()
+        )
+    }
+}
+
+val MIGRATION_5_6 = object : Migration(5, 6) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+                CREATE TABLE IF NOT EXISTS user_profile (
+                    userId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    displayName TEXT NOT NULL,
+                    age INTEGER
+                    
+                )
+                """.trimIndent()
+        )
+        db.execSQL (
+            """
+                CRATE TABLE IF NOT EXISTS avatar_config (
+                userId INTEGER PRIMARY KEY NOT NULL,
+                avatarKey TEXT NOT NULL
+            )
+            """.trimIndent()
+        )
+    }
+}
+
 // Appen og testene bruker samme liste, så en ny oppgraderingsvei ikke glemmes ett sted.
 // Room velger den direkte 2 → 4-veien når den finnes. Den gamle 2 → 3 beholdes uendret.
-val ALL_DATABASE_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_2_4)
+val ALL_DATABASE_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_2_4, MIGRATION_4_5, MIGRATION_5_6)

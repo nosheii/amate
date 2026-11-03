@@ -1,6 +1,13 @@
 package no.gruppe7.amate.core.di
 
 import android.content.Context
+import java.io.File
+import kotlinx.coroutines.CoroutineScope
+import no.gruppe7.amate.feature.weather.data.NetworkWeatherRepository
+import no.gruppe7.amate.feature.weather.data.WeatherRepository
+import no.gruppe7.amate.feature.weather.data.remote.MetWeatherApiService
+import no.gruppe7.amate.feature.weather.location.AndroidLocationDataSource
+import no.gruppe7.amate.feature.weather.location.LocationDataSource
 import androidx.room.Room
 import no.gruppe7.amate.core.database.AmateDatabase
 import no.gruppe7.amate.feature.profile.data.ProfileRepository
@@ -15,10 +22,28 @@ import no.gruppe7.amate.feature.reminders.data.ReminderRepository
 import no.gruppe7.amate.feature.reminders.data.RoomReminderRepository
 import no.gruppe7.amate.feature.water.data.RoomWaterRepository
 import no.gruppe7.amate.feature.water.data.WaterRepository
+import no.gruppe7.amate.feature.steps.data.RoomStepsRepository
+import no.gruppe7.amate.feature.steps.data.StepsRepository
+import no.gruppe7.amate.feature.steps.sensor.AndroidStepSensorDataSource
+import no.gruppe7.amate.feature.steps.sensor.StepSensorDataSource
 
 // Her oppretter vi felles objekter som resten av appen trenger.
 // I stedet for at hver skjerm bygger sin egen database, henter de ting herfra.
-class AppContainer(context: Context) {
+class AppContainer(
+    context: Context,
+    externalScope: CoroutineScope? = null,
+) {
+
+    // Bare en engangsforespørsel når værkortet trenger posisjonen. Starter ingen sporing her.
+    val weatherLocation: LocationDataSource by lazy { AndroidLocationDataSource(context) }
+
+    val weatherRepository: WeatherRepository by lazy {
+        // HTTP-cache er ikke en Room-tabell. Den lagrer nettverkssvar som kan slettes trygt.
+        // Selve nettklienten ordner mellomlagringen på IO når den får en forespørsel.
+        NetworkWeatherRepository(MetWeatherApiService(
+            cacheDirectory = File(context.applicationContext.cacheDir, "weather_http"),
+        ))
+    }
 
     // Lager databasen første gang den faktisk blir brukt.
     // by lazy husker resultatet, så senere bruk får den samme databaseinstansen.
@@ -53,6 +78,15 @@ class AppContainer(context: Context) {
     // Mål får sin egen DAO og sitt eget repository, men deler database med vann/påminnelser.
     val goalDao by lazy { database.goalDao() }
     val goalRepository: GoalRepository by lazy { RoomGoalRepository(goalDao) }
+
+    // Skritt-sensor og skritt-repository
+    val stepSensorDataSource: StepSensorDataSource by lazy {
+        AndroidStepSensorDataSource(context)
+    }
+    val stepsDao by lazy { database.stepsDao() }
+    val stepsRepository: StepsRepository by lazy {
+        RoomStepsRepository(stepsDao, stepSensorDataSource, externalScope)
+    }
 
     // Android-delen lager kanalen, sjekker tillatelse og viser/fjerner varsler.
     val waterReminderNotifications by lazy { WaterReminderNotifications(context) }

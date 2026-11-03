@@ -32,7 +32,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -65,6 +64,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlinx.coroutines.delay
 import no.gruppe7.amate.R
+import no.gruppe7.amate.feature.goals.data.GoalRepository
 import no.gruppe7.amate.feature.water.data.WaterRepository
 import no.gruppe7.amate.feature.water.data.local.WaterEntryEntity
 
@@ -80,13 +80,13 @@ private val WaterColors = lightColorScheme(
 @Composable
 fun WaterRoute(
     repository: WaterRepository,
+    goalRepository: GoalRepository,
     modifier: Modifier = Modifier,
     // En valgfri UI-del. null betyr at denne visningen ikke skal ha påminnelsesinnstillinger.
     // Den sendes inn utenfra, så vannskjermen slipper å kjenne påminnelsenes database og tillatelser.
     reminderSettings: (@Composable () -> Unit)? = null,
 ) {
-    val factory = remember(repository) { WaterViewModel.factory(repository) }
-    val model: WaterViewModel = viewModel(factory = factory)
+    val model = rememberWaterViewModel(repository, goalRepository)
     val state by model.uiState.collectAsStateWithLifecycle()
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { model.refreshDay() }
 
@@ -112,7 +112,7 @@ fun WaterRoute(
                 text = {
                     Column {
                         Text(stringResource(R.string.water_delete_body, entry.amountMl))
-                        state.errorMessageResId?.let {
+                        state.errorMessageResId?.takeIf { it == R.string.water_save_error }?.let {
                             Text(stringResource(it), color = MaterialTheme.colorScheme.error)
                         }
                     }
@@ -215,23 +215,17 @@ fun WaterScreen(
                                 }
                             }
                         }
-                        if (!state.loadFailed) {
-                            val progressDescription = stringResource(R.string.water_progress, (state.progress * 100).toInt())
-                            LinearProgressIndicator(
-                                progress = { state.progress },
-                                modifier = Modifier.fillMaxWidth().height(10.dp).semantics { contentDescription = progressDescription },
-                                color = Color(0xFF5383A1), trackColor = Color(0xFFE1EAF0),
-                            )
-                            Text(stringResource(R.string.water_display_goal, numbers.format(state.displayGoalMl)), style = MaterialTheme.typography.bodyMedium)
-                            Text(stringResource(R.string.water_goal_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
+                        WaterGoalSummary(state, onRetry)
                     }
                 }
             }
-            state.errorMessageResId?.let { error ->
+            // Lesefeilen skal være synlig selv med en åpen editor.
+            // Lagringsfeilen vises derimot bare der handlingen foregikk: feltet, dialogen eller listen.
+            state.listErrorMessageResId?.let { error ->
                 item {
                     Column {
-                        Text(stringResource(error), color = MaterialTheme.colorScheme.error)
+                        Text(stringResource(error), color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.testTag("water_list_error"))
                         TextButton(onClick = if (state.loadFailed) onRetry else onDismissError) {
                             Text(stringResource(if (state.loadFailed) R.string.water_retry else R.string.water_dismiss_error))
                         }
@@ -353,6 +347,14 @@ fun WaterScreen(
 }
 
 @Composable
+internal fun rememberWaterViewModel(repository: WaterRepository, goalRepository: GoalRepository): WaterViewModel {
+    // MainActivity og vannskjermen har samme ViewModelStore. viewModel() gir derfor samme objekt,
+    // ikke en ny vannlogg hver gang vi bytter side. Room er fortsatt stedet dataene lagres.
+    val factory = remember(repository, goalRepository) { WaterViewModel.factory(repository, goalRepository) }
+    return viewModel(factory = factory)
+}
+
+@Composable
 private fun WaterDrop() {
     Box(Modifier.size(64.dp).background(Color(0xFFDFEDF4), RoundedCornerShape(22.dp)), contentAlignment = Alignment.Center) {
         Canvas(Modifier.size(32.dp, 40.dp)) {
@@ -373,7 +375,7 @@ private fun WaterDrop() {
 private fun WaterScreenPreview() {
     MaterialTheme(colorScheme = WaterColors) {
         WaterScreen(
-            state = WaterUiState(isLoading = false),
+            state = WaterUiState(isLoading = false, isGoalLoading = false),
             onQuickAdd = {}, onAddCustom = {}, onEdit = {}, onDelete = {},
             onRetry = {}, onDismissError = {},
             onAmountChange = {}, onSaveEdit = {}, onCancelEdit = {},

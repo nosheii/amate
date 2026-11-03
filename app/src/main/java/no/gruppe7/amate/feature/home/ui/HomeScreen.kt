@@ -1,6 +1,7 @@
 package no.gruppe7.amate.feature.home.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,15 +20,20 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -38,6 +44,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.gruppe7.amate.R
+import no.gruppe7.amate.feature.steps.ui.StepsUiState
+import no.gruppe7.amate.feature.water.ui.WaterGoalSummary
+import no.gruppe7.amate.feature.water.ui.WaterUiState
+import no.gruppe7.amate.feature.weather.ui.WeatherCard
+import java.text.NumberFormat
+import java.util.Locale
 
 // Foreløpige farger til skallet. Vi endrer ikke det felles designsystemet til gruppa.
 private val Cream = Color(0xFFFFFBF1)
@@ -66,9 +78,16 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     onOpenWater: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
+    onOpenGoals: () -> Unit = {},
+    onOpenSteps: () -> Unit = {},
+    waterState: WaterUiState = WaterUiState(),
+    stepsState: StepsUiState = StepsUiState(),
+    onRetryWater: () -> Unit = {},
+    weatherContent: @Composable () -> Unit = { WeatherCard() },
 ) {
-    // Bare visning her: ingen ViewModel, Room eller oppdiktede brukerdata.
-    // Callbackene sier fra om knappetrykk. Den som viser skjermen bestemmer hvor vi går.
+    // Forsiden får en ferdig tilstand fra vannmodellen. Jeg gjør ikke egne databasekall her.
+    // Da kan vannkortet vise ekte tall, mens resten av forsiden fortsatt er et skall.
+    val numbers = remember { NumberFormat.getIntegerInstance(Locale.forLanguageTag("nb-NO")) }
     Box(
         modifier.fillMaxSize().background(
             Brush.verticalGradient(listOf(Sky, Color(0xFFF5F4DC), Color(0xFFE3EACF)))
@@ -104,21 +123,15 @@ fun HomeScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(stringResource(R.string.home_greeting), style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold)
-                    // Streker i kortene betyr ikke at brukeren har null registreringer.
+                    // Vann, skritt og vær er koblet til data. Resten er foreløpig plassholdere.
                     Text(stringResource(R.string.home_preview_note), style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
             item {
                 HomeCard {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                        IconTile(HomeIcons.Sun, Color(0xFFFFE8AC), Color(0xFFA36C15))
-                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text(stringResource(R.string.home_weather), fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.titleMedium)
-                            Text(stringResource(R.string.home_coming_later), style = MaterialTheme.typography.bodyMedium)
-                        }
-                    }
+                    // Innholdet kommer utenfra. Forsiden trenger ikke selv kjenne vær-API-et.
+                    weatherContent()
                 }
             }
             item {
@@ -126,15 +139,43 @@ fun HomeScreen(
                     style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             }
             item {
-                HomeCard {
+                HomeCard(modifier = Modifier.clickable { onOpenSteps() }.testTag("home_open_steps")) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                         IconTile(HomeIcons.Steps, Color(0xFFE4EBCB), Moss)
-                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text(stringResource(R.string.home_steps), fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.titleLarge)
-                            // Tomt spor, ikke en falsk fremdriftsprosent. Skrittkoblingen kommer senere.
-                            Box(Modifier.fillMaxWidth().height(8.dp).background(Color(0xFFE9E4D3), CircleShape))
-                            Text(stringResource(R.string.home_not_connected), style = MaterialTheme.typography.bodySmall)
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(stringResource(R.string.goals_steps), fontWeight = FontWeight.Bold)
+                            Text(
+                                stringResource(R.string.steps_count_format, numbers.format(stepsState.stepsToday)),
+                                color = Moss,
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier.testTag("home_steps_total"),
+                            )
+                            val progress = stepsState.progress
+                            val goal = stepsState.stepGoal
+                            if (goal != null && progress != null) {
+                                LinearProgressIndicator(
+                                    progress = { progress },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(8.dp)
+                                        .clip(CircleShape),
+                                    color = Moss,
+                                    trackColor = Color(0xFFE9E4D3),
+                                )
+                                Text(
+                                    stringResource(R.string.steps_goal_summary, numbers.format(goal)),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            } else {
+                                Box(Modifier.fillMaxWidth().height(8.dp).background(Color(0xFFE9E4D3), CircleShape))
+                                Text(
+                                    stringResource(R.string.steps_no_goal),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
                         }
                     }
                 }
@@ -144,16 +185,30 @@ fun HomeScreen(
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                         IconTile(HomeIcons.Water, Color(0xFFDCECF4), WaterBlue)
                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text(stringResource(R.string.home_water), color = WaterBlue, fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.titleLarge)
-                            Text(stringResource(R.string.home_water_hint), style = MaterialTheme.typography.bodySmall)
+                            Text(stringResource(R.string.water_today), fontWeight = FontWeight.Bold)
+                            when {
+                                waterState.isLoading -> CircularProgressIndicator(Modifier.size(24.dp))
+                                waterState.loadFailed -> {
+                                    Text(stringResource(R.string.water_load_error), color = MaterialTheme.colorScheme.error)
+                                    TextButton(onClick = onRetryWater, modifier = Modifier.testTag("home_water_retry")) {
+                                        Text(stringResource(R.string.water_retry))
+                                    }
+                                }
+                                else -> Text(stringResource(R.string.water_amount, numbers.format(waterState.totalTodayMl)),
+                                    color = WaterBlue, fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.titleLarge, modifier = Modifier.testTag("home_water_total"))
+                            }
                         }
                     }
-                    // Bare en snarvei. Den gamle vannskjermen henter og lagrer fortsatt dataene.
+                    WaterGoalSummary(waterState, onRetryWater, tagPrefix = "home")
+                    // Knappen går fortsatt til selve registreringen. Forsiden lagrer ingenting selv.
                     Button(onClick = onOpenWater, modifier = Modifier.fillMaxWidth().testTag("home_open_water"),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFAA5B12)),
                         shape = RoundedCornerShape(16.dp), contentPadding = PaddingValues(14.dp)) {
                         Text(stringResource(R.string.home_register_water))
+                    }
+                    TextButton(onClick = onOpenGoals, modifier = Modifier.fillMaxWidth().testTag("home_open_goals")) {
+                        Text(stringResource(R.string.home_open_goals))
                     }
                 }
             }
@@ -198,5 +253,5 @@ private fun SummaryCard(icon: ImageVector, title: Int, tint: Color, modifier: Mo
 @Preview(showBackground = true, widthDp = 390, heightDp = 900)
 @Composable
 private fun HomePreview() {
-    HomeShellTheme { HomeScreen() }
+    HomeShellTheme { HomeScreen(waterState = WaterUiState(isLoading = false, isGoalLoading = false)) }
 }
