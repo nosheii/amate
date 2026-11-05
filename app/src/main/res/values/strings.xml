@@ -96,7 +96,7 @@
     <string name="reminders_test_notification_title">Amate – testvarsel</string>
     <string name="reminders_test_notification_body">Dette er bare en test. Trykk her for å åpne Amate.</string>
 
-    <!--- Gjøremål -->
+    <!-- Tekster for gjøremålsskjermen og tilgjengelighetsbeskrivelser for knappene. -->
     <string name="tasks_title">Dagens gjøremål</string>
     <string name="tasks_progress_of">av</string>
     <string name="tasks_progress_done">gjort</string>

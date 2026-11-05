@@ -17,7 +17,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 
-/** TODO: Legg til instrumenterte CRUD-tester. */
+/** Instrumenterte tester av lagring og dagsavgrensning i task-DAO-en. */
 @RunWith(AndroidJUnit4::class)
 class SelfCareTaskDaoTest {
     private lateinit var database: AmateDatabase
@@ -25,6 +25,7 @@ class SelfCareTaskDaoTest {
 
     @Before
     fun setup() {
+        // En separat minnedatabase gjør testene uavhengige av appens lagrede data.
         val context = ApplicationProvider.getApplicationContext<Context>()
         database = Room.inMemoryDatabaseBuilder(context, AmateDatabase::class.java).build()
         taskDao = database.selfCareTaskDao()
@@ -44,6 +45,7 @@ class SelfCareTaskDaoTest {
 
     @Test
     fun dayQuery_excludesOtherUsersAndUsesExclusiveEnd() = runBlocking {
+        // Starttidspunktet er med, sluttidspunktet er ikke med, og andre brukere skjules.
         listOf(
             SelfCareTaskEntity(userId = 1, title = "Dagen før", scheduledForMillis = 999),
             SelfCareTaskEntity(userId = 1, title = "Start", scheduledForMillis = 1000),
@@ -56,5 +58,6 @@ class SelfCareTaskDaoTest {
 
     @Test
     fun openTasks_areListedBeforeCompleted() = runBlocking {
+        // TODO: Sett inn både åpne og fullførte gjøremål, og bekreft rekkefølgen fra DAO-en.
     }
 }
