@@ -22,6 +22,8 @@ import no.gruppe7.amate.feature.reminders.data.ReminderRepository
 import no.gruppe7.amate.feature.reminders.data.RoomReminderRepository
 import no.gruppe7.amate.feature.water.data.RoomWaterRepository
 import no.gruppe7.amate.feature.water.data.WaterRepository
+import no.gruppe7.amate.feature.tasks.data.RoomTaskRepository
+import no.gruppe7.amate.feature.tasks.data.TaskRepository
 import no.gruppe7.amate.feature.steps.data.RoomStepsRepository
 import no.gruppe7.amate.feature.steps.data.StepsRepository
 import no.gruppe7.amate.feature.steps.sensor.AndroidStepSensorDataSource
@@ -79,6 +81,10 @@ class AppContainer(
     val goalDao by lazy { database.goalDao() }
     val goalRepository: GoalRepository by lazy { RoomGoalRepository(goalDao) }
 
+    // Gjøremål deler database med resten, men har egen DAO og eget repository
+    val taskDao by lazy {database.selfCareTaskDao()}
+
+    val taskRepository: TaskRepository by lazy { RoomTaskRepository(taskDao) }
     // Skritt-sensor og skritt-repository
     val stepSensorDataSource: StepSensorDataSource by lazy {
         AndroidStepSensorDataSource(context)
