@@ -7,6 +7,7 @@
     <!-- Været trenger ikke nøyaktig GPS eller tilgang i bakgrunnen. -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
 
     <application
         android:name=".AmateApplication"

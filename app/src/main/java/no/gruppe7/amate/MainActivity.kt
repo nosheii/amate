@@ -1,6 +1,7 @@
 package no.gruppe7.amate
 
 import android.os.Bundle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,7 +15,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.gruppe7.amate.core.navigation.AppDestination
 import no.gruppe7.amate.core.navigation.AmateShell
 import no.gruppe7.amate.feature.goals.ui.GoalsRoute
+import no.gruppe7.amate.feature.steps.ui.StepsRoute
+import no.gruppe7.amate.feature.steps.ui.rememberStepsViewModel
 import no.gruppe7.amate.feature.water.ui.WaterRoute
+import no.gruppe7.amate.feature.profile.ui.ProfileViewModel
+import no.gruppe7.amate.feature.profile.ui.ProfileRoute
 import no.gruppe7.amate.feature.water.ui.rememberWaterViewModel
 import no.gruppe7.amate.feature.reminders.ui.ReminderSettingsRoute
 import no.gruppe7.amate.ui.theme.AmateTheme
@@ -39,14 +44,24 @@ class MainActivity : ComponentActivity() {
                 // Samme modell brukes på begge sider. Den følger både vannloggen og Najmas mål.
                 val waterModel = rememberWaterViewModel(container.waterRepository, container.goalRepository)
                 val waterState by waterModel.uiState.collectAsStateWithLifecycle()
+                val stepsModel = rememberStepsViewModel(container.stepsRepository, container.goalRepository)
+                val stepsState by stepsModel.uiState.collectAsStateWithLifecycle()
                 LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { waterModel.refreshDay() }
                 AmateShell(
                     waterContent = { WaterRoute(container.waterRepository, container.goalRepository) },
+                    stepsContent = { StepsRoute(container.stepsRepository, container.goalRepository, onOpenGoals = { navigationRequest = AppDestination.GOALS }) },
                     settingsContent = { ReminderSettingsRoute(container.reminderRepository) },
+                    profileContent = {
+                        val viewModel: ProfileViewModel = viewModel(
+                            factory = ProfileViewModel.factory(container.profileRepository)
+                        )
+                        ProfileRoute(viewModel = viewModel)
+                    },
                     // Vær kobles bare inn på hjemskjermen. Vann og varsler fungerer som før.
                     weatherContent = { WeatherRoute(container.weatherRepository, container.weatherLocation) },
                     goalsContent = { GoalsRoute(container.goalRepository) },
                     waterState = waterState,
+                    stepsState = stepsState,
                     onRetryWater = waterModel::retry,
                     navigationRequest = navigationRequest,
                     onNavigationHandled = {

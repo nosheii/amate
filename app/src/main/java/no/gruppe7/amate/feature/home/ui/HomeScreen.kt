@@ -1,6 +1,7 @@
 package no.gruppe7.amate.feature.home.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -31,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -41,6 +44,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.gruppe7.amate.R
+import no.gruppe7.amate.feature.steps.ui.StepsUiState
 import no.gruppe7.amate.feature.water.ui.WaterGoalSummary
 import no.gruppe7.amate.feature.water.ui.WaterUiState
 import no.gruppe7.amate.feature.weather.ui.WeatherCard
@@ -75,7 +79,9 @@ fun HomeScreen(
     onOpenWater: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
     onOpenGoals: () -> Unit = {},
+    onOpenSteps: () -> Unit = {},
     waterState: WaterUiState = WaterUiState(),
+    stepsState: StepsUiState = StepsUiState(),
     onRetryWater: () -> Unit = {},
     weatherContent: @Composable () -> Unit = { WeatherCard() },
 ) {
@@ -117,7 +123,7 @@ fun HomeScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(stringResource(R.string.home_greeting), style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold)
-                    // Vann og vær er koblet til data. Resten er foreløpig plassholdere.
+                    // Vann, skritt og vær er koblet til data. Resten er foreløpig plassholdere.
                     Text(stringResource(R.string.home_preview_note), style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
@@ -133,15 +139,43 @@ fun HomeScreen(
                     style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             }
             item {
-                HomeCard {
+                HomeCard(modifier = Modifier.clickable { onOpenSteps() }.testTag("home_open_steps")) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                         IconTile(HomeIcons.Steps, Color(0xFFE4EBCB), Moss)
-                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text(stringResource(R.string.home_steps), fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.titleLarge)
-                            // Tomt spor, ikke en falsk fremdriftsprosent. Skrittkoblingen kommer senere.
-                            Box(Modifier.fillMaxWidth().height(8.dp).background(Color(0xFFE9E4D3), CircleShape))
-                            Text(stringResource(R.string.home_not_connected), style = MaterialTheme.typography.bodySmall)
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(stringResource(R.string.goals_steps), fontWeight = FontWeight.Bold)
+                            Text(
+                                stringResource(R.string.steps_count_format, numbers.format(stepsState.stepsToday)),
+                                color = Moss,
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier.testTag("home_steps_total"),
+                            )
+                            val progress = stepsState.progress
+                            val goal = stepsState.stepGoal
+                            if (goal != null && progress != null) {
+                                LinearProgressIndicator(
+                                    progress = { progress },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(8.dp)
+                                        .clip(CircleShape),
+                                    color = Moss,
+                                    trackColor = Color(0xFFE9E4D3),
+                                )
+                                Text(
+                                    stringResource(R.string.steps_goal_summary, numbers.format(goal)),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            } else {
+                                Box(Modifier.fillMaxWidth().height(8.dp).background(Color(0xFFE9E4D3), CircleShape))
+                                Text(
+                                    stringResource(R.string.steps_no_goal),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
                         }
                     }
                 }
