@@ -47,6 +47,7 @@ import no.gruppe7.amate.feature.weather.ui.WeatherCard
 fun AmateShell(
     waterContent: @Composable () -> Unit,
     settingsContent: @Composable () -> Unit,
+    profileContent: @Composable () -> Unit,
     goalsContent: @Composable () -> Unit = {},
     stepsContent: @Composable () -> Unit = {},
     waterState: WaterUiState = WaterUiState(),
@@ -128,6 +129,7 @@ fun AmateShell(
                         weatherContent = weatherContent,
                     )
                     AppDestination.WATER -> waterContent()
+                    AppDestination.PROFILE -> profileContent()
                     AppDestination.STEPS -> stepsContent()
                     AppDestination.GOALS -> goalsContent()
                     AppDestination.SETTINGS -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
