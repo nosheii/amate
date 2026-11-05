@@ -120,7 +120,7 @@ val MIGRATION_5_6 = object : Migration(5, 6) {
         )
         db.execSQL (
             """
-                CRATE TABLE IF NOT EXISTS avatar_config (
+                CREATE TABLE IF NOT EXISTS avatar_config (
                 userId INTEGER PRIMARY KEY NOT NULL,
                 avatarKey TEXT NOT NULL
             )
