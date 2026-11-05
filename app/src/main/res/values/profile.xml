@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_title">Min profil</string>
+    <string name="profile_choose_avatar">Velg din avatar</string>
+    <string name="profile_selected_avatar">Valgt avatar: %1$s</string>
+    <string name="profile_avatar_cat">Katt</string>
+    <string name="profile_avatar_bear">Bjørn</string>
+    <string name="profile_avatar_dog">Hund</string>
+    <string name="profile_avatar_frog">Frosk</string>
+    <string name="profile_avatar_rabbit">Kanin</string>
+    <string name="profile_age">Alder (valgfritt)</string>
+    <string name="profile_name">Navn</string>
+    <string name="profile_save">Lagre</string>
+</resources>

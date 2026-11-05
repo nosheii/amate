@@ -60,6 +60,8 @@ class HomeWaterIntegrationTest {
             AmateShell(
                 waterState = state, onRetryWater = model::retry,
                 waterContent = { WaterRoute(water, goals) }, settingsContent = { Text("Testinnstillinger") },
+                // Denne testen handler om vann, så profil trenger ikke sin egen databasekobling her.
+                profileContent = { Text("Testprofil") },
             )
         }
     }
