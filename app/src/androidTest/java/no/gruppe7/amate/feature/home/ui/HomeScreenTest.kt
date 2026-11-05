@@ -29,6 +29,8 @@ class HomeScreenTest {
             AmateShell(
                 waterContent = { Text("Vannside for test") },
                 settingsContent = { Text("Påminnelser for test") },
+                // Profil er nå koblet inn i skallet. Her holder det med en enkel testside.
+                profileContent = { Text("Profilside for test") },
                 goalsContent = {Text ("Målside for test") },
             )
         }
@@ -71,13 +73,14 @@ class HomeScreenTest {
     }
 
     @Test
-    fun bottomTabsOpenPlaceholderPages() {
+    fun bottomTabsOpenProgressPlaceholderAndProfileContent() {
         compose.onNodeWithTag("home_tab_progress").performClick()
         compose.onNodeWithTag("home_tab_progress").assertIsSelected()
         compose.onNodeWithText("Her kommer det mer etter hvert. Foreløpig er dette bare et skall, uten personlige data.")
             .assertIsDisplayed()
         compose.onNodeWithTag("home_tab_profile").performClick()
         compose.onNodeWithTag("home_tab_profile").assertIsSelected()
+        compose.onNodeWithText("Profilside for test").assertIsDisplayed()
         compose.onNodeWithTag("home_tab_home").performClick()
         compose.onNodeWithTag("home_settings").assertIsDisplayed()
     }

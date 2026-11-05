@@ -10,8 +10,9 @@ import org.junit.Before
 import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
+// Samme JUnit-sjekker som resten av Android-testene bruker. Krever ikke et nytt bibliotek.
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 
 @RunWith(AndroidJUnit4::class)
 class AvatarConfigDaoTest {
