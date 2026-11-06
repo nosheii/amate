@@ -161,4 +161,5 @@
     <string name="steps_history_title">Tidligere dager</string>
     <string name="steps_history_empty">Ingen tidligere skrittdata registrert ennå.</string>
     <string name="steps_edit_goal">Endre mål</string>
+    <string name="steps_register_steps">Registrer skritt</string>
 </resources>

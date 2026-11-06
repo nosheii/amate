@@ -178,6 +178,15 @@ fun HomeScreen(
                             }
                         }
                     }
+                    Button(
+                        onClick = onOpenSteps,
+                        modifier = Modifier.fillMaxWidth().testTag("home_open_steps_button"),
+                        colors = ButtonDefaults.buttonColors(containerColor = Moss),
+                        shape = RoundedCornerShape(16.dp),
+                        contentPadding = PaddingValues(14.dp),
+                    ) {
+                        Text(stringResource(R.string.steps_register_steps))
+                    }
                 }
             }
             item {

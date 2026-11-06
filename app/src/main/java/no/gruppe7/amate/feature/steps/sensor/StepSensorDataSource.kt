@@ -80,5 +80,8 @@ class AndroidStepSensorDataSource(
             return@callbackFlow
         }
 
+        awaitClose {
+            sensorManager.unregisterListener(listener)
+        }
     }
 }
