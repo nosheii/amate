@@ -3,6 +3,8 @@ package no.gruppe7.amate.core.di
 import android.content.Context
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import no.gruppe7.amate.feature.weather.data.NetworkWeatherRepository
 import no.gruppe7.amate.feature.weather.data.WeatherRepository
 import no.gruppe7.amate.feature.weather.data.remote.MetWeatherApiService
@@ -85,13 +87,18 @@ class AppContainer(
     val taskDao by lazy {database.selfCareTaskDao()}
 
     val taskRepository: TaskRepository by lazy { RoomTaskRepository(taskDao) }
+
+    private val defaultScope by lazy {
+        externalScope ?: CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    }
+
     // Skritt-sensor og skritt-repository
     val stepSensorDataSource: StepSensorDataSource by lazy {
         AndroidStepSensorDataSource(context)
     }
     val stepsDao by lazy { database.stepsDao() }
     val stepsRepository: StepsRepository by lazy {
-        RoomStepsRepository(stepsDao, stepSensorDataSource, externalScope)
+        RoomStepsRepository(stepsDao, stepSensorDataSource, defaultScope)
     }
 
     // Android-delen lager kanalen, sjekker tillatelse og viser/fjerner varsler.

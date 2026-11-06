@@ -19,7 +19,7 @@ import no.gruppe7.amate.feature.steps.data.StepsRepository
 class StepsViewModel(
     private val stepsRepository: StepsRepository,
     private val goalRepository: GoalRepository? = null,
-    private val userId: Long = 0,
+    private val userId: Long = 1,
 ) : ViewModel() {
 
     private val permissionGrantedState = MutableStateFlow(false)
@@ -59,7 +59,7 @@ class StepsViewModel(
     class Factory(
         private val stepsRepository: StepsRepository,
         private val goalRepository: GoalRepository? = null,
-        private val userId: Long = 0,
+        private val userId: Long = 1,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -72,7 +72,7 @@ class StepsViewModel(
 fun rememberStepsViewModel(
     stepsRepository: StepsRepository,
     goalRepository: GoalRepository? = null,
-    userId: Long = 0,
+    userId: Long = 1,
 ): StepsViewModel {
     return viewModel(
         factory = StepsViewModel.Factory(stepsRepository, goalRepository, userId)

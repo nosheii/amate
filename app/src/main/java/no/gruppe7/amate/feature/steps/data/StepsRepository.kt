@@ -11,11 +11,11 @@ import java.time.LocalDate
 
 interface StepsRepository {
     // sanntidsantal skritt for gitt dag
-    fun getStepsForToday(userId: Long = 0, epochDay: Long = LocalDate.now().toEpochDay()): Flow<Int>
+    fun getStepsForToday(userId: Long = 1, epochDay: Long = LocalDate.now().toEpochDay()): Flow<Int>
     // sanntidsliste over registrerte dager for bruker, nyeste først
-    fun getStepsHistory(userId: Long = 0): Flow<List<DailyStepsEntity>>
+    fun getStepsHistory(userId: Long = 1): Flow<List<DailyStepsEntity>>
     // legger til skritt i dagens sum, oppretter raden hvis den ikke finnes
-    suspend fun incrementStep(userId: Long = 0, count: Int = 1, epochDay: Long = LocalDate.now().toEpochDay())
+    suspend fun incrementStep(userId: Long = 1, count: Int = 1, epochDay: Long = LocalDate.now().toEpochDay())
     val isSensorAvailable: Boolean
 }
 // lytter på sensor og legger hver skritthendelse i databasenh
@@ -32,7 +32,7 @@ class RoomStepsRepository(
         // send sensorhendelse videre til databasen
         externalScope?.launch {
             stepSensorDataSource.stepEvents.collect { delta ->
-                incrementStep(userId = 0, count = delta)
+                incrementStep(userId = 1, count = delta)
             }
         }
     }
