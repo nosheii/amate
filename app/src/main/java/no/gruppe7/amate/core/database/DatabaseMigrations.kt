@@ -106,6 +106,29 @@ val MIGRATION_4_5 = object : Migration(4, 5) {
     }
 }
 
+val MIGRATION_5_6 = object : Migration(5, 6) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+                CREATE TABLE IF NOT EXISTS user_profile (
+                    userId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    displayName TEXT NOT NULL,
+                    age INTEGER
+                    
+                )
+                """.trimIndent()
+        )
+        db.execSQL (
+            """
+                CREATE TABLE IF NOT EXISTS avatar_config (
+                userId INTEGER PRIMARY KEY NOT NULL,
+                avatarKey TEXT NOT NULL
+            )
+            """.trimIndent()
+        )
+    }
+}
+
 // Appen og testene bruker samme liste, så en ny oppgraderingsvei ikke glemmes ett sted.
 // Room velger den direkte 2 → 4-veien når den finnes. Den gamle 2 → 3 beholdes uendret.
-val ALL_DATABASE_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_2_4, MIGRATION_4_5)
+val ALL_DATABASE_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_2_4, MIGRATION_4_5, MIGRATION_5_6)

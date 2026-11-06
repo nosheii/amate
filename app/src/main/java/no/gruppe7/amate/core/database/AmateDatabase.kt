@@ -2,9 +2,14 @@ package no.gruppe7.amate.core.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import no.gruppe7.amate.feature.profile.data.local.AvatarConfigEntity
+import no.gruppe7.amate.feature.profile.data.local.UserProfileDao
 import no.gruppe7.amate.feature.goals.data.local.GoalDao
 import no.gruppe7.amate.feature.goals.data.local.GoalEntity
+import no.gruppe7.amate.feature.profile.data.local.AvatarConfigDao
+import no.gruppe7.amate.feature.profile.data.local.UserProfileEntity
 import no.gruppe7.amate.feature.tasks.data.local.SelfCareTaskEntity
+import no.gruppe7.amate.feature.tasks.data.local.SelfCareTaskDao
 import no.gruppe7.amate.feature.water.data.local.WaterDao
 import no.gruppe7.amate.feature.water.data.local.WaterEntryEntity
 import no.gruppe7.amate.feature.reminders.data.local.ReminderDao
@@ -20,6 +25,8 @@ import no.gruppe7.amate.feature.steps.data.local.StepsDao
 @Database(
     // Både mål og vannpåminnelser bruker samme database. Ingen gamle tabeller fjernes.
     entities = [
+        UserProfileEntity::class,
+        AvatarConfigEntity::class,
         WaterEntryEntity::class,
         ReminderEntity::class,
         ReminderDeliveryEntity::class,
@@ -28,17 +35,26 @@ import no.gruppe7.amate.feature.steps.data.local.StepsDao
         DailyStepsEntity::class,
     ],
 
-    // main var på 3. Den samlede versjonen med mål og gjøremål var 4. Skritt i v5.
-    version = 5,
+    // main var på 3. Den samlede versjonen med mål og gjøremål blir derfor 4.
+    // Versjon 5: Skritt. versjon6: Profil og avatar.
+    version = 6,
     exportSchema = false,
 )
 abstract class AmateDatabase : RoomDatabase() {
+    // Gir resten av appen  tilgang til funksjonene i UserprofileDao.
+    abstract fun userProfileDao(): UserProfileDao
+
+    //Tilgang til funksjonene i AvatarConfigDao.
+    abstract fun avatarConfigDao(): AvatarConfigDao
 
     // Gir resten av appen tilgang til funksjonen i WaterDao.
     abstract fun waterDao(): WaterDao
 
     // Gir resten av appen tilgang til funksjonene i GoalDao.
     abstract fun goalDao(): GoalDao
+
+    // Gir resten av appen tilgang til funksjonen i SelfCareTaskDao
+    abstract fun selfCareTaskDao(): SelfCareTaskDao
 
     // Tilgang til brukerens lagrede påminnelsesvalg.
     abstract fun reminderDao(): ReminderDao
