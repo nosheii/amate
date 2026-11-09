@@ -1,6 +1,7 @@
 package no.gruppe7.amate.feature.home.ui
 
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasTestTag
@@ -31,6 +32,15 @@ class HomeScreenTest {
                 settingsContent = { Text("Påminnelser for test") },
                 // Profil er nå koblet inn i skallet. Her holder det med en enkel testside.
                 profileContent = { Text("Profilside for test") },
+                stepsContent = { Text("Skrittside for test") },
+                progressContent = { openGoals, openWater, openSteps ->
+                    androidx.compose.foundation.layout.Column {
+                        Text("Fremgangside for test")
+                        TextButton(onClick = openGoals) { Text("Mål fra fremgang") }
+                        TextButton(onClick = openWater) { Text("Vann fra fremgang") }
+                        TextButton(onClick = openSteps) { Text("Skritt fra fremgang") }
+                    }
+                },
                 goalsContent = {Text ("Målside for test") },
             )
         }
@@ -73,15 +83,27 @@ class HomeScreenTest {
     }
 
     @Test
-    fun bottomTabsOpenProgressPlaceholderAndProfileContent() {
+    fun bottomTabsOpenProgressAndProfileContent() {
         compose.onNodeWithTag("home_tab_progress").performClick()
         compose.onNodeWithTag("home_tab_progress").assertIsSelected()
-        compose.onNodeWithText("Her kommer det mer etter hvert. Foreløpig er dette bare et skall, uten personlige data.")
-            .assertIsDisplayed()
+        compose.onNodeWithText("Fremgangside for test").assertIsDisplayed()
         compose.onNodeWithTag("home_tab_profile").performClick()
         compose.onNodeWithTag("home_tab_profile").assertIsSelected()
         compose.onNodeWithText("Profilside for test").assertIsDisplayed()
         compose.onNodeWithTag("home_tab_home").performClick()
         compose.onNodeWithTag("home_settings").assertIsDisplayed()
+    }
+
+    @Test
+    fun progressShortcutsOpenGoalsWaterAndSteps() {
+        compose.onNodeWithTag("home_tab_progress").performClick()
+        compose.onNodeWithText("Mål fra fremgang").performClick()
+        compose.onNodeWithText("Målside for test").assertIsDisplayed()
+        compose.onNodeWithTag("home_tab_progress").performClick()
+        compose.onNodeWithText("Vann fra fremgang").performClick()
+        compose.onNodeWithText("Vannside for test").assertIsDisplayed()
+        compose.onNodeWithTag("home_tab_progress").performClick()
+        compose.onNodeWithText("Skritt fra fremgang").performClick()
+        compose.onNodeWithText("Skrittside for test").assertIsDisplayed()
     }
 }

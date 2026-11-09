@@ -50,6 +50,8 @@ fun AmateShell(
     profileContent: @Composable () -> Unit,
     goalsContent: @Composable () -> Unit = {},
     stepsContent: @Composable () -> Unit = {},
+    // Fremgang får snarveiene fra skallet. Skjermen trenger ikke selv styre navigasjonen.
+    progressContent: @Composable (onOpenGoals: () -> Unit, onOpenWater: () -> Unit, onOpenSteps: () -> Unit) -> Unit = { _, _, _ -> },
     waterState: WaterUiState = WaterUiState(),
     stepsState: StepsUiState = StepsUiState(),
     onRetryWater: () -> Unit = {},
@@ -131,6 +133,11 @@ fun AmateShell(
                     AppDestination.WATER -> waterContent()
                     AppDestination.PROFILE -> profileContent()
                     AppDestination.STEPS -> stepsContent()
+                    AppDestination.PROGRESS -> progressContent(
+                        { destination = AppDestination.GOALS },
+                        { destination = AppDestination.WATER },
+                        { destination = AppDestination.STEPS },
+                    )
                     AppDestination.GOALS -> goalsContent()
                     AppDestination.SETTINGS -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
                         Column(Modifier.widthIn(max = 600.dp).fillMaxSize().verticalScroll(rememberScrollState())
@@ -149,7 +156,7 @@ fun AmateShell(
 
 @Composable
 private fun PlaceholderPage(destination: AppDestination) {
-    // Profil og fremgang er bare tomme sider. Vi bygger ikke de andres funksjoner her.
+    // Reservevisning for destinasjoner som ennå ikke er koblet til innhold.
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         Text(stringResource(destination.title()), style = MaterialTheme.typography.headlineMedium,
