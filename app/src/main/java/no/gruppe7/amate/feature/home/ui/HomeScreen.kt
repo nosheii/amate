@@ -80,6 +80,7 @@ fun HomeScreen(
     onOpenSettings: () -> Unit = {},
     onOpenGoals: () -> Unit = {},
     onOpenSteps: () -> Unit = {},
+    onOpenTasks: () -> Unit = {},
     waterState: WaterUiState = WaterUiState(),
     stepsState: StepsUiState = StepsUiState(),
     onRetryWater: () -> Unit = {},
@@ -135,8 +136,16 @@ fun HomeScreen(
                 }
             }
             item {
-                Text(stringResource(R.string.home_today), color = Moss,
-                    style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(R.string.home_today), color = Moss,
+                        style= MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f))
+                    // Gjøremålene har egen skjerm. Forsiden lenker bare dit.
+                    TextButton(onClick = onOpenTasks, modifier = Modifier.testTag("home_open_tasks")) {
+                        Text(stringResource(R.string.home_open_tasks))
+                    }
+                }
+
             }
             item {
                 HomeCard(modifier = Modifier.clickable { onOpenSteps() }.testTag("home_open_steps")) {

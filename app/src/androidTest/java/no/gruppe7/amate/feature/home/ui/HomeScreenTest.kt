@@ -4,9 +4,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -42,6 +42,7 @@ class HomeScreenTest {
                     }
                 },
                 goalsContent = {Text ("Målside for test") },
+                tasksContent = {Text("Gjøremål for test") },
             )
         }
     }
@@ -70,6 +71,18 @@ class HomeScreenTest {
         compose.onNodeWithTag("home_open_goals").performClick()
         compose.onNodeWithText("Mine mål").assertIsDisplayed()
         compose.onNodeWithText("Målside for test").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Tilbake til hjem").performClick()
+        compose.onNodeWithTag("home_settings").assertIsDisplayed()
+    }
+
+    @Test
+    fun tasksShortcutOpensTasksAndBackReturnsHome() {
+        // Finn selve gjøremål-knappen, ikke målknappen som ligger lenger ned på forsiden.
+        compose.onNodeWithTag("home_list").performScrollToNode(hasTestTag("home_open_tasks"))
+        compose.onNodeWithTag("home_open_tasks").assertTextEquals("Gjøremål").performClick()
+        compose.onNodeWithText("Gjøremål").assertIsDisplayed()
+        compose.onNodeWithText("Gjøremål for test").assertIsDisplayed()
+        compose.onNodeWithTag("home_tab_home").assertIsSelected()
         compose.onNodeWithContentDescription("Tilbake til hjem").performClick()
         compose.onNodeWithTag("home_settings").assertIsDisplayed()
     }
