@@ -25,6 +25,7 @@ import no.gruppe7.amate.feature.water.ui.rememberWaterViewModel
 import no.gruppe7.amate.feature.reminders.ui.ReminderSettingsRoute
 import no.gruppe7.amate.ui.theme.AmateTheme
 import no.gruppe7.amate.feature.weather.ui.WeatherRoute
+import no.gruppe7.amate.feature.progress.ui.ProgressRoute
 
 class MainActivity : ComponentActivity() {
     // Et varsel kan komme både før skjermen er laget og mens appen allerede er åpen.
@@ -61,6 +62,11 @@ class MainActivity : ComponentActivity() {
                     // Vær kobles bare inn på hjemskjermen. Vann og varsler fungerer som før.
                     weatherContent = { WeatherRoute(container.weatherRepository, container.weatherLocation) },
                     goalsContent = { GoalsRoute(container.goalRepository) },
+                    // Fremgang bruker de eksisterende kildene til vann, skritt og mål, ikke en egen database.
+                    progressContent = { openGoals, openWater, openSteps ->
+                        ProgressRoute(container.waterRepository, container.goalRepository, openGoals, openWater,
+                            stepsRepository = container.stepsRepository, onOpenSteps = openSteps)
+                    },
                     tasksContent = { TasksRoute(container.taskRepository) },
                     waterState = waterState,
                     stepsState = stepsState,

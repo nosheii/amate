@@ -142,6 +142,7 @@ fun HomeScreen(
                         modifier = Modifier.weight(1f))
                     // Gjøremålene har egen skjerm. Forsiden lenker bare dit.
                     TextButton(onClick = onOpenTasks, modifier = Modifier.testTag("home_open_tasks")) {
+                        Text(stringResource(R.string.home_open_tasks))
                     }
                 }
 

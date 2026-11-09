@@ -50,6 +50,8 @@ fun AmateShell(
     profileContent: @Composable () -> Unit,
     goalsContent: @Composable () -> Unit = {},
     stepsContent: @Composable () -> Unit = {},
+    // Fremgang får snarveiene fra skallet. Skjermen trenger ikke selv styre navigasjonen.
+    progressContent: @Composable (onOpenGoals: () -> Unit, onOpenWater: () -> Unit, onOpenSteps: () -> Unit) -> Unit = { _, _, _ -> },
     tasksContent: @Composable () -> Unit = {},
     waterState: WaterUiState = WaterUiState(),
     stepsState: StepsUiState = StepsUiState(),
@@ -124,6 +126,8 @@ fun AmateShell(
                         onOpenSettings = { destination = AppDestination.SETTINGS },
                         onOpenGoals = { destination = AppDestination.GOALS },
                         onOpenSteps = { destination = AppDestination.STEPS },
+                        // Knappen på forsiden skal åpne gjøremål, ikke bare se klikkbar ut.
+                        onOpenTasks = { destination = AppDestination.TASKS },
                         waterState = waterState,
                         stepsState = stepsState,
                         onRetryWater = onRetryWater,
@@ -132,6 +136,11 @@ fun AmateShell(
                     AppDestination.WATER -> waterContent()
                     AppDestination.PROFILE -> profileContent()
                     AppDestination.STEPS -> stepsContent()
+                    AppDestination.PROGRESS -> progressContent(
+                        { destination = AppDestination.GOALS },
+                        { destination = AppDestination.WATER },
+                        { destination = AppDestination.STEPS },
+                    )
                     AppDestination.GOALS -> goalsContent()
                     AppDestination.TASKS -> tasksContent()
                     AppDestination.SETTINGS -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
@@ -151,7 +160,7 @@ fun AmateShell(
 
 @Composable
 private fun PlaceholderPage(destination: AppDestination) {
-    // Profil og fremgang er bare tomme sider. Vi bygger ikke de andres funksjoner her.
+    // Reservevisning for destinasjoner som ennå ikke er koblet til innhold.
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         Text(stringResource(destination.title()), style = MaterialTheme.typography.headlineMedium,
