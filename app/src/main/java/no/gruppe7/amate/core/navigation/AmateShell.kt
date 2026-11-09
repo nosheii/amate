@@ -50,6 +50,7 @@ fun AmateShell(
     profileContent: @Composable () -> Unit,
     goalsContent: @Composable () -> Unit = {},
     stepsContent: @Composable () -> Unit = {},
+    tasksContent: @Composable () -> Unit = {},
     waterState: WaterUiState = WaterUiState(),
     stepsState: StepsUiState = StepsUiState(),
     onRetryWater: () -> Unit = {},
@@ -94,7 +95,7 @@ fun AmateShell(
                     listOf(AppDestination.HOME, AppDestination.PROGRESS, AppDestination.PROFILE).forEach { tab ->
                         NavigationBarItem(
                             selected = if (tab == AppDestination.HOME) {
-                                destination in listOf(AppDestination.HOME, AppDestination.WATER, AppDestination.STEPS, AppDestination.SETTINGS, AppDestination.GOALS)
+                                destination in listOf(AppDestination.HOME, AppDestination.WATER, AppDestination.STEPS, AppDestination.SETTINGS, AppDestination.GOALS, AppDestination.TASKS)
                             } else destination == tab,
                             onClick = { destination = tab },
                             icon = { Icon(when (tab) {
@@ -132,6 +133,7 @@ fun AmateShell(
                     AppDestination.PROFILE -> profileContent()
                     AppDestination.STEPS -> stepsContent()
                     AppDestination.GOALS -> goalsContent()
+                    AppDestination.TASKS -> tasksContent()
                     AppDestination.SETTINGS -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
                         Column(Modifier.widthIn(max = 600.dp).fillMaxSize().verticalScroll(rememberScrollState())
                             .padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -166,5 +168,6 @@ private fun AppDestination.title(): Int = when (this) {
     AppDestination.STEPS -> R.string.steps_title
     AppDestination.SETTINGS -> R.string.home_settings_title
     AppDestination.GOALS -> R.string.goals_title
+    AppDestination.TASKS -> R.string.home_tasks_title
     else -> R.string.home_nav_home
 }

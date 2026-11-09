@@ -20,6 +20,7 @@ import no.gruppe7.amate.feature.steps.ui.rememberStepsViewModel
 import no.gruppe7.amate.feature.water.ui.WaterRoute
 import no.gruppe7.amate.feature.profile.ui.ProfileViewModel
 import no.gruppe7.amate.feature.profile.ui.ProfileRoute
+import no.gruppe7.amate.feature.tasks.ui.TasksRoute
 import no.gruppe7.amate.feature.water.ui.rememberWaterViewModel
 import no.gruppe7.amate.feature.reminders.ui.ReminderSettingsRoute
 import no.gruppe7.amate.ui.theme.AmateTheme
@@ -60,6 +61,7 @@ class MainActivity : ComponentActivity() {
                     // Vær kobles bare inn på hjemskjermen. Vann og varsler fungerer som før.
                     weatherContent = { WeatherRoute(container.weatherRepository, container.weatherLocation) },
                     goalsContent = { GoalsRoute(container.goalRepository) },
+                    tasksContent = { TasksRoute(container.taskRepository) },
                     waterState = waterState,
                     stepsState = stepsState,
                     onRetryWater = waterModel::retry,
