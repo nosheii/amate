@@ -5,7 +5,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -32,6 +31,7 @@ class HomeScreenTest {
                 // Profil er nå koblet inn i skallet. Her holder det med en enkel testside.
                 profileContent = { Text("Profilside for test") },
                 goalsContent = {Text ("Målside for test") },
+                tasksContent = {Text("Gjøremål for test") },
             )
         }
     }
@@ -60,6 +60,16 @@ class HomeScreenTest {
         compose.onNodeWithTag("home_open_goals").performClick()
         compose.onNodeWithText("Mine mål").assertIsDisplayed()
         compose.onNodeWithText("Målside for test").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Tilbake til hjem").performClick()
+        compose.onNodeWithTag("home_settings").assertIsDisplayed()
+    }
+
+    @Test
+    fun tasksShortcutOpensTasksAndBackReturnsHome() {
+        compose.onNodeWithTag("home_list").performScrollToNode(hasTestTag("home_open_goals"))
+        compose.onNodeWithTag("home_open_tasks").performClick()
+        compose.onNodeWithText("Gjøremål").assertIsDisplayed()
+        compose.onNodeWithText("Gjøremål for test").assertIsDisplayed()
         compose.onNodeWithContentDescription("Tilbake til hjem").performClick()
         compose.onNodeWithTag("home_settings").assertIsDisplayed()
     }
