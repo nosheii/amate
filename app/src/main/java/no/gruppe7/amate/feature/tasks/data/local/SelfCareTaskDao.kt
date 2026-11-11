@@ -6,7 +6,6 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
-import no.gruppe7.amate.feature.goals.data.local.GoalEntity
 
 // Her samles alt vi kan gjøre med gjoremålene i databasen
 // Room skriver inn selve koden bak disse funksjonene for oss
@@ -36,5 +35,10 @@ interface SelfCareTaskDao {
         startMillis: Long,
         endMillis: Long,
     ): Flow<List<SelfCareTaskEntity>>
+
+    // Antall gjøremål fullført noensinne. Brukes av merkene.
+    @Query("SELECT COUNT(*) FROM self_care_tasks WHERE userId = :userId AND isCompleted = 1")
+    fun observeCompletedCount(userId: Long): Flow<Int>
+
 }
 

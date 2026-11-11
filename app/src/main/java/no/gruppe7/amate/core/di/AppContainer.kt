@@ -30,6 +30,8 @@ import no.gruppe7.amate.feature.steps.data.RoomStepsRepository
 import no.gruppe7.amate.feature.steps.data.StepsRepository
 import no.gruppe7.amate.feature.steps.sensor.AndroidStepSensorDataSource
 import no.gruppe7.amate.feature.steps.sensor.StepSensorDataSource
+import no.gruppe7.amate.feature.achievements.data.AchievementRepository
+import no.gruppe7.amate.feature.achievements.data.RoomAchievementRepository
 
 // Her oppretter vi felles objekter som resten av appen trenger.
 // I stedet for at hver skjerm bygger sin egen database, henter de ting herfra.
@@ -87,6 +89,10 @@ class AppContainer(
     val taskDao by lazy {database.selfCareTaskDao()}
 
     val taskRepository: TaskRepository by lazy { RoomTaskRepository(taskDao) }
+
+    // Merker leser fra vann, skritt og gjøremål, men lagrer bare hva som er tatt.
+    val achievementDao by lazy { database.achievementDao() }
+    val achievementRepository: AchievementRepository by lazy { RoomAchievementRepository(achievementDao) }
 
     private val defaultScope by lazy {
         externalScope ?: CoroutineScope(SupervisorJob() + Dispatchers.IO)
