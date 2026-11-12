@@ -14,6 +14,9 @@ import androidx.room.Room
 import no.gruppe7.amate.core.database.AmateDatabase
 import no.gruppe7.amate.feature.profile.data.ProfileRepository
 import no.gruppe7.amate.feature.profile.data.RoomProfileRepository
+import no.gruppe7.amate.feature.onboarding.data.AndroidOnboardingCompletionStore
+import no.gruppe7.amate.feature.onboarding.data.OnboardingRepository
+import no.gruppe7.amate.feature.onboarding.data.RoomOnboardingRepository
 import no.gruppe7.amate.feature.goals.data.GoalRepository
 import no.gruppe7.amate.feature.goals.data.RoomGoalRepository
 import no.gruppe7.amate.core.database.ALL_DATABASE_MIGRATIONS
@@ -70,6 +73,11 @@ class AppContainer(
     val avatarConfigDao by lazy { database.avatarConfigDao() }
     val profileRepository: ProfileRepository by lazy {
         RoomProfileRepository(userProfileDao, avatarConfigDao)
+    }
+
+    // Oppstarten gjenbruker profil og mål. Ingen ny database eller ny bruker-ID er nødvendig.
+    val onboardingRepository: OnboardingRepository by lazy {
+        RoomOnboardingRepository(database, profileRepository, goalRepository, AndroidOnboardingCompletionStore(context))
     }
 
     // Gir enkel tilgang til WaterDao.

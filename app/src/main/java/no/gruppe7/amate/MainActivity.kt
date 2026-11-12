@@ -1,12 +1,17 @@
 package no.gruppe7.amate
 
 import android.os.Bundle
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.Lifecycle
@@ -26,6 +31,7 @@ import no.gruppe7.amate.feature.reminders.ui.ReminderSettingsRoute
 import no.gruppe7.amate.ui.theme.AmateTheme
 import no.gruppe7.amate.feature.weather.ui.WeatherRoute
 import no.gruppe7.amate.feature.progress.ui.ProgressRoute
+import no.gruppe7.amate.feature.onboarding.ui.OnboardingGate
 
 class MainActivity : ComponentActivity() {
     // Et varsel kan komme både før skjermen er laget og mens appen allerede er åpen.
@@ -43,40 +49,52 @@ class MainActivity : ComponentActivity() {
         setContent {
             AmateTheme {
                 val container = (application as AmateApplication).container
-                // Samme modell brukes på begge sider. Den følger både vannloggen og Najmas mål.
-                val waterModel = rememberWaterViewModel(container.waterRepository, container.goalRepository)
-                val waterState by waterModel.uiState.collectAsStateWithLifecycle()
-                val stepsModel = rememberStepsViewModel(container.stepsRepository, container.goalRepository)
-                val stepsState by stepsModel.uiState.collectAsStateWithLifecycle()
-                LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { waterModel.refreshDay() }
-                AmateShell(
-                    waterContent = { WaterRoute(container.waterRepository, container.goalRepository) },
-                    stepsContent = { StepsRoute(container.stepsRepository, container.goalRepository, onOpenGoals = { navigationRequest = AppDestination.GOALS }) },
-                    settingsContent = { ReminderSettingsRoute(container.reminderRepository) },
-                    profileContent = {
-                        val viewModel: ProfileViewModel = viewModel(
-                            factory = ProfileViewModel.factory(container.profileRepository)
-                        )
-                        ProfileRoute(viewModel = viewModel)
-                    },
-                    // Vær kobles bare inn på hjemskjermen. Vann og varsler fungerer som før.
-                    weatherContent = { WeatherRoute(container.weatherRepository, container.weatherLocation) },
-                    goalsContent = { GoalsRoute(container.goalRepository) },
-                    // Fremgang bruker de eksisterende kildene til vann, skritt og mål, ikke en egen database.
-                    progressContent = { openGoals, openWater, openSteps ->
-                        ProgressRoute(container.waterRepository, container.goalRepository, openGoals, openWater,
-                            stepsRepository = container.stepsRepository, onOpenSteps = openSteps)
-                    },
-                    tasksContent = { TasksRoute(container.taskRepository) },
-                    waterState = waterState,
-                    stepsState = stepsState,
-                    onRetryWater = waterModel::retry,
-                    navigationRequest = navigationRequest,
-                    onNavigationHandled = {
-                        handledWaterRequestId = waterRequestId(intent)
-                        navigationRequest = null
-                    },
-                )
+                // Oppstarten står foran hele appen. Et varseltrykk venter her til profilen er klar.
+                OnboardingGate(container.onboardingRepository) {
+                    // Samme modell brukes på begge sider. Den følger både vannloggen og Najmas mål.
+                    val waterModel = rememberWaterViewModel(container.waterRepository, container.goalRepository)
+                    val waterState by waterModel.uiState.collectAsStateWithLifecycle()
+                    val stepsModel = rememberStepsViewModel(container.stepsRepository, container.goalRepository)
+                    val stepsState by stepsModel.uiState.collectAsStateWithLifecycle()
+                    DisposableEffect(stepsModel) {
+                        // Hvis profilen nullstilles og hjem forsvinner, stopper også sensorlytteren.
+                        onDispose { stepsModel.onPermissionResult(false) }
+                    }
+                    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+                        waterModel.refreshDay()
+                        // Fanger også opp et ja/nei gitt i oppstarten eller i Androids innstillinger.
+                        stepsModel.onPermissionResult(Build.VERSION.SDK_INT < 29 || ContextCompat.checkSelfPermission(
+                            this@MainActivity, Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_GRANTED)
+                    }
+                    AmateShell(
+                        waterContent = { WaterRoute(container.waterRepository, container.goalRepository) },
+                        stepsContent = { StepsRoute(container.stepsRepository, container.goalRepository, onOpenGoals = { navigationRequest = AppDestination.GOALS }) },
+                        settingsContent = { ReminderSettingsRoute(container.reminderRepository) },
+                        profileContent = {
+                            val viewModel: ProfileViewModel = viewModel(
+                                factory = ProfileViewModel.factory(container.profileRepository)
+                            )
+                            ProfileRoute(viewModel = viewModel)
+                        },
+                        // Vær kobles bare inn på hjemskjermen. Vann og varsler fungerer som før.
+                        weatherContent = { WeatherRoute(container.weatherRepository, container.weatherLocation) },
+                        goalsContent = { GoalsRoute(container.goalRepository) },
+                        // Fremgang bruker de eksisterende kildene til vann, skritt og mål, ikke en egen database.
+                        progressContent = { openGoals, openWater, openSteps ->
+                            ProgressRoute(container.waterRepository, container.goalRepository, openGoals, openWater,
+                                stepsRepository = container.stepsRepository, onOpenSteps = openSteps)
+                        },
+                        tasksContent = { TasksRoute(container.taskRepository) },
+                        waterState = waterState,
+                        stepsState = stepsState,
+                        onRetryWater = waterModel::retry,
+                        navigationRequest = navigationRequest,
+                        onNavigationHandled = {
+                            handledWaterRequestId = waterRequestId(intent)
+                            navigationRequest = null
+                        },
+                    )
+                }
             }
         }
     }

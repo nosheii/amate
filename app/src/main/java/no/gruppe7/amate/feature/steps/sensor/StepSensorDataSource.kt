@@ -1,6 +1,10 @@
 package no.gruppe7.amate.feature.steps.sensor
 
 import android.content.Context
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.content.ContextCompat
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -19,6 +23,7 @@ interface StepSensorDataSource {
 class AndroidStepSensorDataSource(
     context: Context,
 ) : StepSensorDataSource {
+    private val appContext = context.applicationContext
 
 
     // applicationcontext unngår å holde på en activity
@@ -35,7 +40,8 @@ class AndroidStepSensorDataSource(
     // Gjør sensorlytteren om til en Flow. Lytteren registreres når noen begynner å
     // samle inn flowen, og fjernes når innsamlingen stopper.
     override val stepEvents: Flow<Int> = callbackFlow {
-        if (sensorManager == null || stepSensor == null) {
+        if (sensorManager == null || stepSensor == null || (Build.VERSION.SDK_INT >= 29 &&
+            ContextCompat.checkSelfPermission(appContext, Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED)) {
             close()
             return@callbackFlow
         }
@@ -69,11 +75,14 @@ class AndroidStepSensorDataSource(
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
         }
 
-        val registered = sensorManager.registerListener(
+        val registered = try { sensorManager.registerListener(
             listener,
             stepSensor,
             SensorManager.SENSOR_DELAY_UI,
-        )
+        ) } catch (_: SecurityException) {
+            // Android kan trekke tillatelsen tilbake mellom sjekken og registreringen.
+            false
+        }
 
         if (!registered) {
             close()
