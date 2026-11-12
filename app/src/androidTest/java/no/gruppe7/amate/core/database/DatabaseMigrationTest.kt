@@ -15,9 +15,13 @@ import no.gruppe7.amate.feature.goals.data.RoomGoalRepository
 import no.gruppe7.amate.feature.goals.data.local.GoalDao
 import no.gruppe7.amate.feature.goals.data.local.GoalEntity
 import no.gruppe7.amate.feature.goals.data.local.GoalType
+import no.gruppe7.amate.feature.profile.data.local.AvatarConfigEntity
 import no.gruppe7.amate.feature.tasks.data.local.SelfCareTaskEntity
 import no.gruppe7.amate.feature.water.data.local.WaterDao
 import no.gruppe7.amate.feature.water.data.local.WaterEntryEntity
+import no.gruppe7.amate.feature.profile.data.local.UserProfileEntity
+import no.gruppe7.amate.feature.steps.data.local.DailyStepsEntity
+import no.gruppe7.amate.feature.achievements.data.RoomAchievementRepository
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -53,6 +57,18 @@ abstract class LegacyMainDatabase : RoomDatabase() {
     abstract fun reminderDao(): ReminderDao
     abstract fun reminderDeliveryDao(): no.gruppe7.amate.feature.reminders.data.local.ReminderDeliveryDao
 }
+
+// Versjon 6 slik den så ut før merkene kom: alle tabeller unntatt user_achievements
+@Database(
+    entities = [UserProfileEntity::class, AvatarConfigEntity::class, WaterEntryEntity::class,
+        ReminderEntity::class, ReminderDeliveryEntity::class, GoalEntity::class,
+        SelfCareTaskEntity::class, DailyStepsEntity::class],
+    version = 6, exportSchema = false)
+abstract class LegacyVersion6Database: RoomDatabase() {
+    abstract fun waterDao(): WaterDao
+    abstract fun goalDao(): GoalDao
+}
+
 
 @RunWith(AndroidJUnit4::class)
 class DatabaseMigrationTest {
@@ -190,6 +206,33 @@ class DatabaseMigrationTest {
                 assertTrue(cursor.moveToFirst())
                 assertEquals(0, cursor.getInt(0))
             }
+        } finally {
+            legacy.close()
+            upgraded?.close()
+            context.deleteDatabase(name)
+        }
+    }
+    @Test fun upgradeFrom6To7KeepsDataAndAddsAchievements() = runBlocking {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val name = "migration-v6-${java.util.UUID.randomUUID()}.db"
+        val legacy = Room.databaseBuilder(context, LegacyVersion6Database::class.java, name).build()
+        var upgraded: AmateDatabase? = null
+        try {
+            val water = WaterEntryEntity(userId = 1, amountMl = 400, loggedAtMillis = 1234)
+            val waterId = legacy.waterDao().insert(water)
+            val goalId = RoomGoalRepository(legacy.goalDao()).saveGoal(1, GoalType.WATER, 2500)
+            legacy.close()
+
+            val current = Room.databaseBuilder(context, AmateDatabase::class.java, name)
+                .addMigrations(*ALL_DATABASE_MIGRATIONS).build()
+            upgraded = current
+            // Gamle data skal overleve oppgraderingen.
+            assertEquals(water.copy(id = waterId), current.waterDao().observeEntries(1).first().single())
+            assertEquals(goalId, current.goalDao().observeGoal(1, GoalType.WATER).first()?.id)
+            // Den nye tabellen skal finnes og virke gjennom repository-et.
+            val achievements = RoomAchievementRepository(current.achievementDao())
+            achievements.award(1, setOf("WATER_FIRST"), 5000)
+            assertEquals(listOf("WATER_FIRST"), achievements.observeEarned(1).first().map { it.code })
         } finally {
             legacy.close()
             upgraded?.close()
