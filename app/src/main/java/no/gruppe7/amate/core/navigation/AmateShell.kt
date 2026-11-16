@@ -50,6 +50,9 @@ fun AmateShell(
     profileContent: @Composable () -> Unit,
     goalsContent: @Composable () -> Unit = {},
     stepsContent: @Composable () -> Unit = {},
+    // Fremgang får snarveiene fra skallet. Skjermen trenger ikke selv styre navigasjonen.
+    progressContent: @Composable (onOpenGoals: () -> Unit, onOpenWater: () -> Unit, onOpenSteps: () -> Unit) -> Unit = { _, _, _ -> },
+    tasksContent: @Composable () -> Unit = {},
     waterState: WaterUiState = WaterUiState(),
     stepsState: StepsUiState = StepsUiState(),
     onRetryWater: () -> Unit = {},
@@ -94,7 +97,7 @@ fun AmateShell(
                     listOf(AppDestination.HOME, AppDestination.PROGRESS, AppDestination.PROFILE).forEach { tab ->
                         NavigationBarItem(
                             selected = if (tab == AppDestination.HOME) {
-                                destination in listOf(AppDestination.HOME, AppDestination.WATER, AppDestination.STEPS, AppDestination.SETTINGS, AppDestination.GOALS)
+                                destination in listOf(AppDestination.HOME, AppDestination.WATER, AppDestination.STEPS, AppDestination.SETTINGS, AppDestination.GOALS, AppDestination.TASKS)
                             } else destination == tab,
                             onClick = { destination = tab },
                             icon = { Icon(when (tab) {
@@ -123,6 +126,8 @@ fun AmateShell(
                         onOpenSettings = { destination = AppDestination.SETTINGS },
                         onOpenGoals = { destination = AppDestination.GOALS },
                         onOpenSteps = { destination = AppDestination.STEPS },
+                        // Knappen på forsiden skal åpne gjøremål, ikke bare se klikkbar ut.
+                        onOpenTasks = { destination = AppDestination.TASKS },
                         waterState = waterState,
                         stepsState = stepsState,
                         onRetryWater = onRetryWater,
@@ -131,7 +136,13 @@ fun AmateShell(
                     AppDestination.WATER -> waterContent()
                     AppDestination.PROFILE -> profileContent()
                     AppDestination.STEPS -> stepsContent()
+                    AppDestination.PROGRESS -> progressContent(
+                        { destination = AppDestination.GOALS },
+                        { destination = AppDestination.WATER },
+                        { destination = AppDestination.STEPS },
+                    )
                     AppDestination.GOALS -> goalsContent()
+                    AppDestination.TASKS -> tasksContent()
                     AppDestination.SETTINGS -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
                         Column(Modifier.widthIn(max = 600.dp).fillMaxSize().verticalScroll(rememberScrollState())
                             .padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -149,7 +160,7 @@ fun AmateShell(
 
 @Composable
 private fun PlaceholderPage(destination: AppDestination) {
-    // Profil og fremgang er bare tomme sider. Vi bygger ikke de andres funksjoner her.
+    // Reservevisning for destinasjoner som ennå ikke er koblet til innhold.
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         Text(stringResource(destination.title()), style = MaterialTheme.typography.headlineMedium,
@@ -166,5 +177,6 @@ private fun AppDestination.title(): Int = when (this) {
     AppDestination.STEPS -> R.string.steps_title
     AppDestination.SETTINGS -> R.string.home_settings_title
     AppDestination.GOALS -> R.string.goals_title
+    AppDestination.TASKS -> R.string.home_tasks_title
     else -> R.string.home_nav_home
 }

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_loading">Henter profilen din …</string>
+    <string name="onboarding_load_error">Profilen kunne ikke hentes. Prøv igjen – vi har ikke endret noe.</string>
+    <string name="onboarding_step">Steg %1$d av 3</string>
+    <string name="onboarding_welcome">Velkommen til AMATE!</string>
+    <string name="onboarding_welcome_body">Hva skal vi kalle deg? Velg også en liten venn. Profilen lagres bare på denne enheten – du trenger ikke passord.</string>
+    <string name="onboarding_name_error">Skriv et navn på 1–40 tegn.</string>
+    <string name="onboarding_avatar_error">Velg en avatar før du fortsetter.</string>
+    <string name="onboarding_goals_title">Dine daglige mål</string>
+    <string name="onboarding_goals_body">Hva ønsker du å sikte mot? Begge feltene er valgfrie. Du kan sette og endre mål senere. Hopper du over, beholder vi eventuelle mål du allerede har.</string>
+    <string name="onboarding_water_goal">Vann per dag (ml, 500–10 000)</string>
+    <string name="onboarding_steps_goal">Skritt per dag (1 000–50 000)</string>
+    <string name="onboarding_water_error">Bruk et helt tall mellom 500 og 10 000 ml, eller la feltet stå tomt.</string>
+    <string name="onboarding_steps_error">Bruk et helt tall mellom 1 000 og 50 000 skritt, eller la feltet stå tomt.</string>
+    <string name="onboarding_permissions_title">Du bestemmer tilgangen</string>
+    <string name="onboarding_permissions_body">Disse valgene er frivillige. Du kan fortsette uten å gi tilgang, og endre det senere.</string>
+    <string name="onboarding_permission_steps">Skritteller</string>
+    <string name="onboarding_permission_steps_body">Aktivitetstilgang lar telefonens skrittsensor telle for deg. Uten tilgang kan du fortsatt registrere skritt manuelt.</string>
+    <string name="onboarding_permission_notifications">Varsler</string>
+    <string name="onboarding_permission_notifications_body">Tillater vannvarsler. Selve påminnelsene og tidspunktene velger du senere i Innstillinger – vi slår dem ikke på nå.</string>
+    <string name="onboarding_permission_location">Vær der du er</string>
+    <string name="onboarding_permission_location_body">Omtrentlig posisjon brukes til lokalt vær. Vi trenger ikke nøyaktig posisjon eller bakgrunnstilgang. Uten tilgang vises Oslo tydelig som reservested.</string>
+    <string name="onboarding_permission_granted">Tilgang er gitt.</string>
+    <string name="onboarding_permission_no_sensor">Denne enheten har ingen skrittsensor. Du kan fortsatt registrere skritt manuelt.</string>
+    <string name="onboarding_permission_denied">Ingen tilgang. Det går helt fint å fortsette uten.</string>
+    <string name="onboarding_permission_optional">Ikke spurt ennå – du velger selv.</string>
+    <string name="onboarding_permission_settings_body">Tilgangen er avslått i Android. Du kan fortsette uten, eller endre det i telefonens innstillinger.</string>
+    <string name="onboarding_permission_allow">Gi tilgang</string>
+    <string name="onboarding_permission_open_settings">Åpne innstillinger</string>
+    <string name="onboarding_next">Neste</string>
+    <string name="onboarding_finish">Start AMATE</string>
+    <string name="onboarding_skip_goals">Sett mål senere</string>
+    <string name="onboarding_back">Tilbake</string>
+    <string name="onboarding_save_error">Profilen ble ikke ferdig lagret. Prøv igjen – valgene dine er fortsatt her.</string>
+</resources>

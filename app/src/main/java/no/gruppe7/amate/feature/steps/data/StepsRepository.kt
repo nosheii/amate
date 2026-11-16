@@ -1,6 +1,7 @@
 package no.gruppe7.amate.feature.steps.data
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -17,22 +18,32 @@ interface StepsRepository {
     // legger til skritt i dagens sum, oppretter raden hvis den ikke finnes
     suspend fun incrementStep(userId: Long = 1, count: Int = 1, epochDay: Long = LocalDate.now().toEpochDay())
     val isSensorAvailable: Boolean
+
+    // Standard tom funksjon lar test-repository-ene fortsette å virke uten Android-sensor.
+    fun setSensorPermission(granted: Boolean) {}
 }
 // lytter på sensor og legger hver skritthendelse i databasenh
 class RoomStepsRepository(
     private val stepsDao: StepsDao,
     private val stepSensorDataSource: StepSensorDataSource,
-    externalScope: CoroutineScope? = null,
+    private val externalScope: CoroutineScope? = null,
 ) : StepsRepository {
 
     override val isSensorAvailable: Boolean
         get() = stepSensorDataSource.isSensorAvailable
 
-    init {
-        // send sensorhendelse videre til databasen
-        externalScope?.launch {
-            stepSensorDataSource.stepEvents.collect { delta ->
-                incrementStep(userId = 1, count = delta)
+    private var sensorJob: Job? = null
+
+    // Ikke begynn å lese sensoren før brukeren sier ja. Et senere ja kan starte den igjen.
+    override fun setSensorPermission(granted: Boolean) {
+        if (!granted) {
+            sensorJob?.cancel()
+            sensorJob = null
+        } else if (sensorJob?.isActive != true) {
+            sensorJob = externalScope?.launch {
+                stepSensorDataSource.stepEvents.collect { delta ->
+                    incrementStep(userId = 1, count = delta)
+                }
             }
         }
     }

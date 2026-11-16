@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="progress_combined_week">Siste 7 dager</string>
+    <string name="progress_steps_shortcut">Skritteller</string>
+    <string name="progress_goal_reference">Dagens mål: %1$s</string>
+    <string name="progress_chart_note">Stiplet linje = dagens mål som referanse, ikke tidligere mål. Vann og skritt har hver sin skala. Snittet inkluderer alle sju dagene.</string>
+    <string name="progress_goals_shortcut">Mål</string>
+    <string name="progress_tab_water">Vann</string>
+    <string name="progress_tab_steps">Skritt</string>
+    <string name="progress_steps_amount">%1$s skritt</string>
+    <string name="progress_steps_error">Skritthistorikken kunne ikke hentes. Prøv igjen.</string>
+    <string name="progress_steps_goal_loading">Henter skrittmålet …</string>
+    <string name="progress_steps_goal_error">Skrittmålet kunne ikke hentes. Prøv igjen.</string>
+    <string name="progress_steps_missing_goal">Du har ikke satt et skrittmål ennå.</string>
+    <string name="progress_steps_goal">Dagsmål: %1$s skritt</string>
+    <string name="progress_steps_empty">Ingen lagrede skritt de siste sju dagene ennå.</string>
+    <string name="progress_steps_day_description">%1$s: %2$s registrerte skritt</string>
+    <string name="progress_steps_week_total">Totalt: %1$s skritt</string>
+    <string name="progress_steps_average">Gjennomsnitt: %1$s skritt per dag</string>
+    <string name="progress_today">I dag · %1$s</string>
+    <string name="progress_amount">%1$s ml</string>
+    <string name="progress_percent">%1$s %% av dagens mål</string>
+    <string name="progress_goal_reached">Dagens mål er nådd.</string>
+    <string name="progress_register_water">Registrer vann</string>
+    <string name="progress_water_error">Vannhistorikken kunne ikke hentes. Prøv igjen.</string>
+    <string name="progress_week_dates">%1$s – %2$s</string>
+    <string name="progress_empty">Ingen vannregistreringer de siste sju dagene ennå.</string>
+    <string name="progress_day_description">%1$s: %2$s milliliter registrert</string>
+    <string name="progress_week_total">Totalt: %1$s ml</string>
+    <string name="progress_week_average">Gjennomsnitt: %1$s ml per dag</string>
+</resources>

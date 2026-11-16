@@ -48,6 +48,7 @@ class StepsViewModel(
 
     fun onPermissionResult(isGranted: Boolean) {
         permissionGrantedState.value = isGranted
+        stepsRepository.setSensorPermission(isGranted)
     }
     // legger til skritt manuelt kan bruker til feks testknapp
     fun addStep(count: Int = 1) {

@@ -16,6 +16,9 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import no.gruppe7.amate.MainActivity
+import no.gruppe7.amate.feature.onboarding.OnboardingTestProfile
+import kotlinx.coroutines.runBlocking
+import org.junit.Before
 import org.junit.After
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
@@ -32,13 +35,23 @@ class WaterNotificationNavigationTest {
 
     private val context get() = ApplicationProvider.getApplicationContext<Context>()
     private var scenario: ActivityScenario<MainActivity>? = null
+    private lateinit var profile: OnboardingTestProfile
+
+    @Before
+    fun prepareProfile() = runBlocking<Unit> {
+        // Disse testene gjelder varsler for en bruker som allerede har fullført oppstarten.
+        profile = OnboardingTestProfile(context)
+        profile.capture()
+        profile.ready()
+    }
 
     @After
-    fun tearDown() {
+    fun tearDown() = runBlocking<Unit> {
         scenario?.close()
         // Rydder bare testvarselet. Testen registrerer ikke vann eller endrer innstillinger.
         context.getSystemService(NotificationManager::class.java)
             .cancel(WaterReminderNotifications.TEST_TAG, WaterReminderNotifications.TEST_NOTIFICATION_ID)
+        profile.restore()
     }
 
     private fun waitForWater() {
