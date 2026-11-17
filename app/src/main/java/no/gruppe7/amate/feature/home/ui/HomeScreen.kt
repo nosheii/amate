@@ -194,7 +194,7 @@ fun HomeScreen(
                         shape = RoundedCornerShape(16.dp),
                         contentPadding = PaddingValues(14.dp),
                     ) {
-                        Text(stringResource(R.string.steps_register_steps))
+                        Text(stringResource(R.string.steps_widget_today_summary, numbers.format(stepsState.stepsToday)))
                     }
                 }
             }
