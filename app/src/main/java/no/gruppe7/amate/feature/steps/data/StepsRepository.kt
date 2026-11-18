@@ -59,14 +59,7 @@ class RoomStepsRepository(
     }
 
     override suspend fun incrementStep(userId: Long, count: Int, epochDay: Long) {
-        // leser sum, legger til nye skritt ogskriver resultatene
-        val existing = stepsDao.getStepsForDayOneShot(userId, epochDay)
-        val currentCount = existing?.stepCount ?: 0
-        val updatedEntity = DailyStepsEntity(
-            userId = userId,
-            epochDay = epochDay,
-            stepCount = currentCount + count,
-        )
-        stepsDao.upsertSteps(updatedEntity)
+        require(userId > 0 && count > 0)
+        stepsDao.increment(userId, epochDay, count)
     }
 }

@@ -120,6 +120,10 @@ class AppContainer(
     // Android-delen lager kanalen, sjekker tillatelse og viser/fjerner varsler.
     val waterReminderNotifications by lazy { WaterReminderNotifications(context) }
     val stepReminderNotifications by lazy { StepReminderNotifications(context) }
+    val stepReminderScheduler by lazy {
+        no.gruppe7.amate.feature.steps.scheduling.WorkManagerStepReminderScheduler(context, stepReminderNotifications)
+    }
+    val stepReminderRunner get() = no.gruppe7.amate.feature.steps.scheduling.StepReminderRunner(database, stepReminderNotifications)
     // Bestiller én gjentakende jobb hos Android når lagrede påminnelser er på.
     val reminderScheduler by lazy { WorkManagerReminderScheduler(context, waterReminderNotifications) }
     // get() lager en ny Runner når den etterspørres. Da får den også en fersk standardklokke,

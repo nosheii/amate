@@ -8,6 +8,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import java.time.Clock
+import java.time.LocalDate
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -16,17 +20,20 @@ import no.gruppe7.amate.feature.goals.data.local.GoalType
 import no.gruppe7.amate.feature.steps.data.StepsRepository
 
 // ViewModel for skrittskjermen henter data fra stepsRepository og goalRepository
+@OptIn(ExperimentalCoroutinesApi::class)
 class StepsViewModel(
     private val stepsRepository: StepsRepository,
     private val goalRepository: GoalRepository? = null,
     private val userId: Long = 1,
+    private val clock: Clock = Clock.systemDefaultZone(),
 ) : ViewModel() {
 
+    private val today = MutableStateFlow(LocalDate.now(clock).toEpochDay())
     private val permissionGrantedState = MutableStateFlow(false)
 
     // combine slår sammen kilder, og hver gang en av dem endrer seg bygges en ny StepsUiState
     val uiState: StateFlow<StepsUiState> = combine(
-        stepsRepository.getStepsForToday(userId),
+        today.flatMapLatest { stepsRepository.getStepsForToday(userId, it) },
         stepsRepository.getStepsHistory(userId),
         goalRepository?.observeGoal(userId, GoalType.STEPS) ?: MutableStateFlow(null),
         permissionGrantedState,
@@ -46,14 +53,19 @@ class StepsViewModel(
         initialValue = StepsUiState(sensorAvailable = stepsRepository.isSensorAvailable),
     )
 
+    // Ny dato/tidssone skal ikke vise gårsdagens sum når appen åpnes igjen.
+    fun refreshDay() { today.value = LocalDate.now(clock).toEpochDay() }
+
     fun onPermissionResult(isGranted: Boolean) {
         permissionGrantedState.value = isGranted
         stepsRepository.setSensorPermission(isGranted)
     }
     // legger til skritt manuelt kan bruker til feks testknapp
     fun addStep(count: Int = 1) {
+        if (count <= 0) return
+        refreshDay()
         viewModelScope.launch {
-            stepsRepository.incrementStep(userId = userId, count = count)
+            stepsRepository.incrementStep(userId = userId, count = count, epochDay = today.value)
         }
     }
 

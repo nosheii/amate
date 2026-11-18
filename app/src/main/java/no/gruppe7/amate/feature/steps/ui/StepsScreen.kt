@@ -44,6 +44,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -75,7 +78,7 @@ fun StepsRoute(
     stepsRepository: StepsRepository,
     goalRepository: GoalRepository? = null,
     onOpenGoals: () -> Unit = {},
-    onTestNotification: (() -> Unit)? = null,
+    onTestNotification: (() -> Boolean)? = null,
 ) {
     val viewModel = rememberStepsViewModel(stepsRepository, goalRepository)
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -95,10 +98,19 @@ fun StepsScreen(
     onPermissionResult: (Boolean) -> Unit = {},
     onAddStep: (Int) -> Unit = {},
     onOpenGoals: () -> Unit = {},
-    onTestNotification: (() -> Unit)? = null,
+    onTestNotification: (() -> Boolean)? = null,
 ) {
     val context = LocalContext.current
     val numbers = remember { NumberFormat.getIntegerInstance(Locale.forLanguageTag("nb-NO")) }
+
+    var notificationResult by rememberSaveable { mutableStateOf<Int?>(null) }
+    fun testNotification() {
+        notificationResult = if (onTestNotification?.invoke() == true) R.string.steps_reminders_sent
+            else R.string.steps_reminders_blocked
+    }
+    val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+        testNotification()
+    }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
@@ -352,9 +364,15 @@ fun StepsScreen(
                                 Text(stringResource(R.string.steps_add_1000))
                             }
                         }
+                        notificationResult?.let { Text(stringResource(it), modifier = Modifier.testTag("steps_test_notification_result")) }
                         if (onTestNotification != null) {
                             OutlinedButton(
-                                onClick = onTestNotification,
+                                onClick = {
+                                    if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context,
+                                            Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                                        notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                    } else testNotification()
+                                },
                                 shape = RoundedCornerShape(12.dp),
                                 modifier = Modifier
                                     .fillMaxWidth()
