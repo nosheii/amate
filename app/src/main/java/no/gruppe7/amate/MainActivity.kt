@@ -10,6 +10,7 @@ import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
@@ -69,7 +70,12 @@ class MainActivity : ComponentActivity() {
                         stepsModel.onPermissionResult(Build.VERSION.SDK_INT < 29 || ContextCompat.checkSelfPermission(
                             this@MainActivity, Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_GRANTED)
                     }
+                    // Oppstart og profil skriver til samme Room-rad. Hjem viser bare lagret valg.
+                    val avatar by remember(container.profileRepository) {
+                        container.profileRepository.observeAvatar(1L)
+                    }.collectAsStateWithLifecycle(initialValue = null)
                     AmateShell(
+                        avatarKey = avatar?.avatarKey.orEmpty(),
                         waterContent = { WaterRoute(container.waterRepository, container.goalRepository) },
                         stepsContent = {
                             StepsRoute(

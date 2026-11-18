@@ -19,6 +19,7 @@ import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withContext
 import no.gruppe7.amate.feature.weather.data.WeatherForecast
 import no.gruppe7.amate.feature.weather.data.WeatherPlace
+import no.gruppe7.amate.feature.weather.data.WeatherPlaceStore
 import no.gruppe7.amate.feature.weather.data.WeatherRepository
 import no.gruppe7.amate.feature.weather.location.LocationDataSource
 import no.gruppe7.amate.feature.weather.location.WeatherCoordinates
@@ -38,7 +39,7 @@ class WeatherLocationViewModelTest {
     @Before fun setUp() { Dispatchers.setMain(StandardTestDispatcher()) }
     @After fun tearDown() { store.clear(); Dispatchers.resetMain() }
 
-    private fun model() = WeatherViewModel(weather, clock = clock, location = location)
+    private fun model(placeStore: WeatherPlaceStore? = null) = WeatherViewModel(weather, clock = clock, location = location, placeStore = placeStore)
         .also { store.put("location-weather", it) }
 
     @Test fun beforePermissionCheck_doesNotAccessLocationOrFetchTheWrongCity() = runTest {
@@ -222,6 +223,91 @@ class WeatherLocationViewModelTest {
             assertThrows(IllegalArgumentException::class.java) { WeatherCoordinates(invalid, 0.0) }
         }
         assertThrows(IllegalArgumentException::class.java) { WeatherCoordinates(0.0, -181.0) }
+    }
+
+    private val bergen = WeatherPlace("Bergen", 60.39, 5.32, ZoneId.of("Europe/Oslo"))
+    private class MemoryPlaceStore(var selected: WeatherPlace? = null) : WeatherPlaceStore {
+        override fun read() = selected
+        override fun save(place: WeatherPlace?) { selected = place }
+    }
+
+    @Test fun manualChoice_survivesPermissionChangesAndRefresh_withoutReadingLocation() = runTest {
+        val saved = MemoryPlaceStore()
+        val model = model(saved)
+        model.onLocationPermission(false)
+        runCurrent()
+        model.selectPlace(bergen)
+        runCurrent()
+        model.onLocationPermission(true)
+        model.refresh()
+        runCurrent()
+        model.onLocationPermission(false, hasAsked = true, canAskAgain = false)
+        runCurrent()
+        assertEquals(bergen, saved.selected)
+        assertEquals(bergen, model.uiState.value.forecast!!.place)
+        assertEquals(WeatherLocationStatus.MANUAL, model.uiState.value.locationStatus)
+        assertEquals(0, location.calls)
+    }
+
+    @Test fun restart_restoresManualPlaceBeforeCheckingPermission() = runTest {
+        val model = model(MemoryPlaceStore(bergen))
+        runCurrent()
+        model.onLocationPermission(true)
+        runCurrent()
+        assertEquals(listOf(bergen), weather.places)
+        assertEquals(WeatherLocationStatus.MANUAL, model.uiState.value.locationStatus)
+        assertEquals(0, location.calls)
+    }
+
+    @Test fun deniedLocationRequest_keepsSavedChoice() = runTest {
+        val saved = MemoryPlaceStore(bergen)
+        val model = model(saved)
+        runCurrent()
+        model.onLocationPermission(false, hasAsked = true, canAskAgain = false)
+        model.requestCurrentLocation()
+        runCurrent()
+        assertEquals(bergen, saved.selected)
+        assertEquals(bergen, model.uiState.value.forecast!!.place)
+        assertEquals(0, location.calls)
+    }
+
+    @Test fun useMyLocation_clearsSavedChoiceAndFetchesPosition() = runTest {
+        val saved = MemoryPlaceStore(bergen)
+        val model = model(saved)
+        runCurrent()
+        model.onLocationPermission(true)
+        model.requestCurrentLocation()
+        runCurrent()
+        assertNull(saved.selected)
+        assertEquals(1, location.calls)
+        assertTrue(model.uiState.value.forecast!!.place.isCurrentLocation)
+    }
+
+    @Test fun selectingManualPlace_cancelsOngoingPositionLookup() = runTest {
+        location.waitForever = true
+        val model = model()
+        model.onLocationPermission(true)
+        runCurrent()
+        model.selectPlace(bergen)
+        runCurrent()
+        assertTrue(location.finished)
+        assertEquals(bergen, model.uiState.value.forecast!!.place)
+        assertEquals(WeatherLocationStatus.MANUAL, model.uiState.value.locationStatus)
+    }
+
+    @Test fun lateFallback_cannotOverwriteManualChoice() = runTest {
+        val gate = CompletableDeferred<Unit>()
+        weather.osloGate = gate
+        val model = model()
+        model.onLocationPermission(false)
+        runCurrent()
+        model.selectPlace(bergen)
+        assertNull(model.uiState.value.forecast)
+        runCurrent()
+        gate.complete(Unit)
+        runCurrent()
+        assertEquals(bergen, model.uiState.value.forecast!!.place)
+        assertFalse(model.uiState.value.isLoading)
     }
 
     private class FakeLocation : LocationDataSource {

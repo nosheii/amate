@@ -59,6 +59,7 @@ fun AmateShell(
     navigationRequest: AppDestination? = null,
     onNavigationHandled: () -> Unit = {},
     weatherContent: @Composable () -> Unit = { WeatherCard() },
+    avatarKey: String = "",
 ) {
     // En liten, midlertidig skjermvelger, ikke gruppas ferdige navigasjonsløsning.
     // rememberSaveable beholder valgt skjerm ved for eksempel rotasjon av telefonen.
@@ -132,6 +133,7 @@ fun AmateShell(
                         stepsState = stepsState,
                         onRetryWater = onRetryWater,
                         weatherContent = weatherContent,
+                        avatarKey = avatarKey,
                     )
                     AppDestination.WATER -> waterContent()
                     AppDestination.PROFILE -> profileContent()
