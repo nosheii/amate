@@ -2,7 +2,26 @@
 
 Værkortet kan vise værvarsel for brukerens **omtrentlige posisjon**.
 Uten posisjon viser det **Oslo som tydelig merket standardsted**. Det er
-ekte prognosedata, ikke en måling akkurat nå. Pollen og manuell stedvelger venter.
+ekte prognosedata, ikke en måling akkurat nå. Pollen venter.
+
+## Manuelt værsted
+
+«Velg sted» åpner en Material-dialog uten å endre resten av værkortet. Skriv minst
+to tegn og trykk «Søk». Velg et treff med sted, region og land. Open-Meteo sitt
+[stedsøk](https://open-meteo.com/en/docs/geocoding-api) gir koordinater og tidssone;
+værvarselet hentes fortsatt fra MET. Søket sender søketeksten og IP-adressen til
+Open-Meteo, ikke telefonens posisjon. GeoNames via Open-Meteo krediteres i dialogen
+(CC BY 4.0). Ingen API-nøkkel eller nye biblioteker brukes.
+
+Bare det aktivt valgte stedet lagres i `weather_place`-preferansen. Det gjenopprettes
+før værhenting, og brukes selv om Android-tillatelsen endres. «Oppdater» oppdaterer
+det valgte stedet. «Bruk min posisjon» fjerner det lagrede valget når tilgang er gitt
+og prøver telefonens posisjon. Ved avslag beholdes det manuelle stedet.
+
+Sjekk avslag → søk etter Bergen → velg treff → oppdater → start appen på nytt.
+Bergen skal fortsatt vises. Prøv deretter «Bruk min posisjon», nettfeil, tomme
+søkeresultater og å lukke søket uten å velge.
+
 
 ## Hvordan det henger sammen
 
@@ -52,8 +71,8 @@ Vi følger [MET sine bruksvilkår](https://api.met.no/doc/TermsOfService).
 Denne lille skoleversjonen kaller API-et direkte, med mellomlagring. MET mottar
 telefonens IP-adresse og koordinatene som brukes i værforespørselen, avrundet til
 fire desimaler. Med tillatelse er dette Androids omtrentlige posisjon; uten
-tillatelse er det faste Oslo-koordinater. Ingen adresseoppslag sendes til en
-annen karttjeneste. Tidene for din posisjon vises i **telefonens tidssone**, ikke
+tillatelse er det koordinatene til manuelt valgt sted, eller Oslo som standard.
+Manuelt stedsøk sender søketeksten til Open-Meteo som beskrevet over. Tidene for din posisjon vises i **telefonens tidssone**, ikke
 en tidssone som er slått opp fra koordinatene. Tidssoneforkortelsen vises i kortet.
 
 Appen ber bare om `ACCESS_COARSE_LOCATION`, ikke nøyaktig posisjon eller
@@ -65,8 +84,8 @@ mens hjem vises; oppdateringsknappen kan hente en ny posisjon tidligere.
 Android-grunnlaget: [omtrentlig posisjon og tillatelser](https://developer.android.com/develop/sensors-and-location/location/permissions/runtime)
 og [engangsposisjon med avbrytelse](https://developer.android.com/reference/androidx/core/location/LocationManagerCompat#getCurrentLocation(android.location.LocationManager,java.lang.String,android.os.CancellationSignal,java.util.concurrent.Executor,androidx.core.util.Consumer%3Candroid.location.Location%3E)).
 
-Det opprettes ingen Room-tabell med posisjonshistorikk. Koordinatene holdes i
-ViewModel, men HTTP-cachen kan inneholde forespørselsadresse med koordinater og
+Det opprettes ingen Room-tabell med posisjonshistorikk. Telefonens koordinater holdes i
+ViewModel; manuelt valgt sted lagres i en preferanse. HTTP-cachen kan inneholde forespørselsadresse med koordinater og
 tilhørende nettverkssvar. En liten preferanse husker bare om forrige
 tillatelsesforespørsel ble avslått. Tilgang kan trekkes tilbake i Android.
 Etter gjentatte avslag tilbyr kortet apptillatelser. Avslåtte posisjonstjenester

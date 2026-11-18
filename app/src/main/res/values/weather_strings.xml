@@ -12,7 +12,7 @@
     <string name="weather_location_retry">Prøv posisjon igjen</string>
     <string name="weather_location_open_permissions">Åpne apptillatelser</string>
     <string name="weather_location_enable_services">Slå på posisjon</string>
-    <string name="weather_location_privacy">Omtrentlig posisjon sendes til MET Norway for å hente været. Vi følger deg ikke i bakgrunnen og lagrer ingen posisjonshistorikk i Room. Nettverkssvar kan mellomlagres på telefonen. Du kan fjerne tilgangen i Android-innstillingene.</string>
+    <string name="weather_location_privacy">Koordinatene for valgt sted eller din omtrentlige posisjon sendes til MET Norway for å hente været. Et manuelt valgt sted huskes på telefonen. Vi følger deg ikke i bakgrunnen og lagrer ingen posisjonshistorikk i Room. Nettverkssvar kan mellomlagres på telefonen. Du kan fjerne tilgangen i Android-innstillingene.</string>
     <string name="weather_temperature">%1$s °C</string>
     <string name="weather_loading">Henter værvarsel…</string>
     <string name="weather_load_error">Kunne ikke hente været. Sjekk nettet, eller prøv igjen litt senere.</string>
@@ -33,4 +33,13 @@
     <string name="weather_thunder">Tordenvær</string>
     <string name="weather_fog">Tåke</string>
     <string name="weather_unknown">Værtype ikke tilgjengelig</string>
+    <string name="weather_choose_place">Velg sted</string>
+    <string name="weather_location_manual">Du viser været for et sted du har valgt selv.</string>
+    <string name="weather_place_query">Søk etter by eller sted</string>
+    <string name="weather_place_search">Søk</string>
+    <string name="weather_place_close">Lukk</string>
+    <string name="weather_place_empty">Ingen steder funnet. Prøv et annet navn.</string>
+    <string name="weather_place_error">Kunne ikke søke etter steder. Prøv igjen.</string>
+    <string name="weather_place_notice">Stedsnavnet du søker etter sendes til Open-Meteo. Posisjonstilgang er ikke nødvendig.</string>
+    <string name="weather_place_source">Stedsdata: GeoNames via Open-Meteo (CC BY 4.0)</string>
 </resources>

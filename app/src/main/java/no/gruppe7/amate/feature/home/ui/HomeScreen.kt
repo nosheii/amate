@@ -1,17 +1,22 @@
 package no.gruppe7.amate.feature.home.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -34,6 +39,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -44,6 +54,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.gruppe7.amate.R
+import no.gruppe7.amate.feature.profile.ui.AvatarImage
 import no.gruppe7.amate.feature.steps.ui.StepsUiState
 import no.gruppe7.amate.feature.water.ui.WaterGoalSummary
 import no.gruppe7.amate.feature.water.ui.WaterUiState
@@ -85,6 +96,7 @@ fun HomeScreen(
     stepsState: StepsUiState = StepsUiState(),
     onRetryWater: () -> Unit = {},
     weatherContent: @Composable () -> Unit = { WeatherCard() },
+    avatarKey: String = "",
 ) {
     // Forsiden får en ferdig tilstand fra vannmodellen. Jeg gjør ikke egne databasekall her.
     // Da kan vannkortet vise ekte tall, mens resten av forsiden fortsatt er et skall.
@@ -114,24 +126,57 @@ fun HomeScreen(
                 }
             }
             item {
+                // Skiltet i tegningen skaleres til kortets bredde, også på større skjermer.
+                // Dyrene har ulik luft rundt seg, derfor bruker vi utsnittet for valgt bilde.
+                val hasAvatar = avatarKey.isNotBlank()
+                val frame = avatarFrame(avatarKey)
+                BoxWithConstraints(Modifier.fillMaxWidth()) {
+                    val imageSize = maxWidth / frame.signWidth
+                    val trimTop = imageSize * frame.top
+                    val cardTop = imageSize * (frame.signTop - frame.top - 0.006f)
+                    val visibleHeight = imageSize * (frame.pawsBottom - frame.top)
+                    Surface(
+                        modifier = Modifier.fillMaxWidth().padding(top = if (hasAvatar) cardTop else 0.dp),
+                        shape = RoundedCornerShape(32.dp), color = frame.signColor,
+                        border = BorderStroke(3.dp, Color.Black),
+                        shadowElevation = 1.dp,
+                    ) {
+                        Text(stringResource(R.string.home_encouragement),
+                            style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp,
+                                top = if (hasAvatar) imageSize * (frame.pawsBottom - frame.signTop) + 12.dp else 26.dp,
+                                bottom = 24.dp))
+                    }
+                    if (hasAvatar) Box(
+                        Modifier.align(Alignment.TopCenter).fillMaxWidth().height(visibleHeight).clipToBounds(),
+                        contentAlignment = Alignment.TopCenter,
+                    ) {
+                        AvatarImage(avatarKey, Modifier.wrapContentSize(Alignment.TopCenter, unbounded = true)
+                            .requiredSize(imageSize).offset(y = -trimTop)
+                            .drawWithContent {
+                                // Klipp bort skiltet i bildet. Én ramme tegner nå hele boksen,
+                                // så en håndtegnet sidekant ikke må skjøtes mot en ny kant.
+                                val silhouette = Path().apply {
+                                    addRect(Rect(0f, 0f, size.width, size.height * (frame.signTop - 0.006f)))
+                                    frame.paws.forEach { (left, right) ->
+                                        addOval(Rect(size.width * left,
+                                            size.height * (frame.signTop - 0.08f),
+                                            size.width * right, size.height * frame.pawsBottom))
+                                    }
+                                }
+                                clipPath(silhouette) { this@drawWithContent.drawContent() }
+                            }
+                            .testTag("home_avatar"))
+                    }
+                }
+            }
+            item {
                 HomeCard {
-                    Text(stringResource(R.string.home_encouragement),
+                    Text(stringResource(R.string.home_greeting),
                         style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(6.dp))
-                }
-            }
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(stringResource(R.string.home_greeting), style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold)
-                    // Vann, skritt og vær er koblet til data. Resten er foreløpig plassholdere.
-                    Text(stringResource(R.string.home_preview_note), style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
-            item {
-                HomeCard {
-                    // Innholdet kommer utenfra. Forsiden trenger ikke selv kjenne vær-API-et.
+                        textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                    // Værinnholdet beholder koblingen til API, stedsvalg og oppdatering.
                     weatherContent()
                 }
             }
@@ -272,4 +317,23 @@ private fun SummaryCard(icon: ImageVector, title: Int, tint: Color, modifier: Mo
 @Composable
 private fun HomePreview() {
     HomeShellTheme { HomeScreen(waterState = WaterUiState(isLoading = false, isGoalLoading = false)) }
+}
+
+// Andeler av originalbildet: skiltets bredde/overkant og utsnittet med hele hodet og potene.
+private data class AvatarFrame(
+    val signWidth: Float, val signTop: Float, val pawsBottom: Float, val top: Float = 0.15f,
+    // Kremtonen er hentet fra skiltet i den tilhørende bildefilen.
+    val signColor: Color = Color(0xFFFCF3E1),
+    val paws: List<Pair<Float, Float>> = listOf(0.235f to 0.385f, 0.605f to 0.755f),
+)
+
+private fun avatarFrame(key: String): AvatarFrame = when (key) {
+    "kanin" -> AvatarFrame(0.705f, 0.700f, 0.744f, top = 0.075f, signColor = Color(0xFFFCF3DE),
+        paws = listOf(0.25f to 0.385f, 0.60f to 0.735f))
+    "hund" -> AvatarFrame(0.825f, 0.650f, 0.700f)
+    "bjørn" -> AvatarFrame(0.825f, 0.670f, 0.720f, signColor = Color(0xFFFCF3E3),
+        paws = listOf(0.20f to 0.36f, 0.635f to 0.795f))
+    "frosk" -> AvatarFrame(0.845f, 0.628f, 0.675f, signColor = Color(0xFFFDF3E2),
+        paws = listOf(0.19f to 0.35f, 0.645f to 0.805f))
+    else -> AvatarFrame(0.745f, 0.645f, 0.688f, signColor = Color(0xFFFDF2E0))
 }

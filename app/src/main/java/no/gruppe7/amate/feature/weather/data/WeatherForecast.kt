@@ -4,7 +4,7 @@ import java.time.Instant
 import java.time.ZoneId
 
 // Oslo er et tydelig merket standardsted hvis brukeren ikke kan/vil dele posisjon.
-// Vi lager ingen Room-tabell med posisjonshistorikk. Værklienten har vanlig HTTP-cache.
+// Et manuelt valgt sted huskes som en preferanse. Ingen posisjonshistorikk i Room.
 data class WeatherPlace(
     val name: String,
     val latitude: Double,

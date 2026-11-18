@@ -39,6 +39,7 @@ fun WeatherCard(
     state: WeatherUiState = WeatherUiState(),
     onRefresh: () -> Unit = {},
     onLocationAction: () -> Unit = {},
+    onChoosePlace: (() -> Unit)? = null,
 ) {
     val uriHandler = LocalUriHandler.current
     // Det viktigste står fremme. Resten kan åpnes i kortet uten en egen side eller popup.
@@ -85,6 +86,10 @@ fun WeatherCard(
                 style = MaterialTheme.typography.bodySmall)
         }
         state.locationStatus?.let { WeatherLocationControls(it, onLocationAction) }
+        if (onChoosePlace != null) TextButton(onClick = onChoosePlace,
+            modifier = Modifier.testTag("weather_choose_place")) {
+            Text(stringResource(R.string.weather_choose_place))
+        }
         if (state.isLoading) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 CircularProgressIndicator(Modifier.size(20.dp))

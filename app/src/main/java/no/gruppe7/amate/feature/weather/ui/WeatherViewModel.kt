@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.withTimeoutOrNull
+import no.gruppe7.amate.feature.weather.data.WeatherPlaceStore
 import no.gruppe7.amate.feature.weather.data.WeatherPlace
 import no.gruppe7.amate.feature.weather.data.WeatherRepository
 import no.gruppe7.amate.feature.weather.location.LocationDataSource
@@ -24,8 +25,10 @@ class WeatherViewModel(
     private val place: WeatherPlace = WeatherPlace.OSLO,
     private val clock: Clock = Clock.systemUTC(),
     private val location: LocationDataSource? = null,
+    private val placeStore: WeatherPlaceStore? = null,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(WeatherUiState(place = place,
+    private var manualPlace = placeStore?.read()
+    private val _uiState = MutableStateFlow(WeatherUiState(place = manualPlace ?: place,
         isLoading = location == null,
         locationStatus = if (location == null) null else WeatherLocationStatus.NEEDS_PERMISSION))
     val uiState = _uiState.asStateFlow()
@@ -37,12 +40,29 @@ class WeatherViewModel(
 
     // I appen sjekker Route tillatelsen først. Da slipper vi å hente Oslo før vi vet
     // at brukeren allerede har gitt tilgang til sin egen posisjon.
-    init { if (location == null) refresh() }
+    init {
+        if (manualPlace != null) {
+            _uiState.update { it.copy(locationStatus = WeatherLocationStatus.MANUAL) }
+            fetchWeather()
+        } else if (location == null) refresh()
+    }
+
+    fun selectPlace(selected: WeatherPlace) {
+        require(!selected.isCurrentLocation)
+        stopLocating()
+        cancelWeatherRequest()
+        manualPlace = selected
+        placeStore?.save(selected)
+        _uiState.update { it.copy(place = selected, forecast = null, loadFailed = false,
+            locationStatus = WeatherLocationStatus.MANUAL) }
+        fetchWeather()
+    }
 
     fun onLocationPermission(granted: Boolean, hasAsked: Boolean = false, canAskAgain: Boolean = true) {
         if (location == null) return
         val changed = permissionGranted != granted
         permissionGranted = granted
+        if (manualPlace != null) { refreshIfNeeded(); return }
         if (granted) {
             if (changed) locate() else refreshIfNeeded()
         } else {
@@ -99,6 +119,9 @@ class WeatherViewModel(
     // Brukes etter et bevisst knappetrykk eller et besøk i posisjonsinnstillingene.
     // Da kan vi avbryte en treg Oslo-henting og prøve brukerens posisjon med en gang.
     fun requestCurrentLocation() {
+        if (!permissionGranted) return
+        manualPlace = null
+        placeStore?.save(null)
         if (permissionGranted) locate()
     }
 
@@ -130,7 +153,7 @@ class WeatherViewModel(
     fun refresh() {
         // Flere raske trykk skal ikke starte flere like nettverkskall.
         if (request?.isActive == true || locationRequest?.isActive == true) return
-        if (permissionGranted && location != null) locate() else fetchWeather()
+        if (manualPlace == null && permissionGranted && location != null) locate() else fetchWeather()
     }
 
     private fun cancelWeatherRequest() {
