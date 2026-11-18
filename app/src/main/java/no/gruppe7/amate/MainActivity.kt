@@ -21,6 +21,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.gruppe7.amate.core.navigation.AppDestination
 import no.gruppe7.amate.core.navigation.AmateShell
 import no.gruppe7.amate.feature.goals.ui.GoalsRoute
+import no.gruppe7.amate.feature.steps.ui.StepReminderSettingsRoute
 import no.gruppe7.amate.feature.steps.ui.StepsRoute
 import no.gruppe7.amate.feature.steps.ui.rememberStepsViewModel
 import no.gruppe7.amate.feature.water.ui.WaterRoute
@@ -39,6 +40,7 @@ class MainActivity : ComponentActivity() {
     // Compose følger denne verdien, så vi trenger ikke starte en ekstra kopi av appen.
     private var navigationRequest by mutableStateOf<AppDestination?>(null)
     private var handledWaterRequestId: String? = null
+    private var handledStepsRequestId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +48,7 @@ class MainActivity : ComponentActivity() {
         // Et gammelt varsel skal ikke åpnes på nytt ved rotasjon. Et NYTT varsel må likevel
         // virke hvis Android gjenoppretter en app som tidligere ble lukket i bakgrunnen.
         handledWaterRequestId = savedInstanceState?.getString(HANDLED_WATER_REQUEST)
+        handledStepsRequestId = savedInstanceState?.getString(HANDLED_STEPS_REQUEST)
         readNavigationRequest(intent)
         setContent {
             AmateTheme {
@@ -74,8 +77,18 @@ class MainActivity : ComponentActivity() {
                     AmateShell(
                         avatarKey = avatar?.avatarKey.orEmpty(),
                         waterContent = { WaterRoute(container.waterRepository, container.goalRepository) },
-                        stepsContent = { StepsRoute(container.stepsRepository, container.goalRepository, onOpenGoals = { navigationRequest = AppDestination.GOALS }) },
-                        settingsContent = { ReminderSettingsRoute(container.reminderRepository) },
+                        stepsContent = {
+                            StepsRoute(
+                                container.stepsRepository,
+                                container.goalRepository,
+                                onOpenGoals = { navigationRequest = AppDestination.GOALS },
+                                onTestNotification = { container.stepReminderNotifications.showTestNotification(stepsState.stepsToday) },
+                            )
+                        },
+                        settingsContent = {
+                            ReminderSettingsRoute(container.reminderRepository)
+                            StepReminderSettingsRoute(container.stepReminderRepository)
+                        },
                         profileContent = {
                             val viewModel: ProfileViewModel = viewModel(
                                 factory = ProfileViewModel.factory(container.profileRepository)
@@ -115,20 +128,28 @@ class MainActivity : ComponentActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putString(HANDLED_WATER_REQUEST, handledWaterRequestId)
+        outState.putString(HANDLED_STEPS_REQUEST, handledStepsRequestId)
     }
 
     private fun readNavigationRequest(intent: Intent, newDelivery: Boolean = false) {
         if (intent.action == ACTION_OPEN_WATER && (newDelivery || waterRequestId(intent) != handledWaterRequestId)) {
             navigationRequest = AppDestination.WATER
+        } else if (intent.action == ACTION_OPEN_STEPS && (newDelivery || stepsRequestId(intent) != handledStepsRequestId)) {
+            navigationRequest = AppDestination.STEPS
         }
     }
 
     private fun waterRequestId(intent: Intent) = intent.getStringExtra(EXTRA_WATER_REQUEST_ID) ?: "water-without-id"
+    private fun stepsRequestId(intent: Intent) = intent.getStringExtra(EXTRA_STEPS_REQUEST_ID) ?: "steps-without-id"
 
     companion object {
         // Delt navn mellom varselet og mottakeren. Vi sender ikke brukerdata i Intent-en.
         const val ACTION_OPEN_WATER = "no.gruppe7.amate.action.OPEN_WATER"
         const val EXTRA_WATER_REQUEST_ID = "water_request_id"
         private const val HANDLED_WATER_REQUEST = "handled_water_request_id"
+
+        const val ACTION_OPEN_STEPS = "no.gruppe7.amate.action.OPEN_STEPS"
+        const val EXTRA_STEPS_REQUEST_ID = "steps_request_id"
+        private const val HANDLED_STEPS_REQUEST = "handled_steps_request_id"
     }
 }
