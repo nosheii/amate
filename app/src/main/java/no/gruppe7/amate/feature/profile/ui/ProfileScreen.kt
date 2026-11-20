@@ -1,6 +1,5 @@
 package no.gruppe7.amate.feature.profile.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,9 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -90,13 +87,8 @@ fun ProfileScreen(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                Image(
-                    painter = painterResource(selected.imageRes),
-                    contentDescription = stringResource(R.string.profile_selected_avatar, stringResource(selected.nameRes)),
-                    // Fit viser hele tegningen uten å kutte av ører eller boksen under dyret.
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.size(160.dp).testTag("profile_avatar_preview"),
-                )
+                AvatarImage(uiState.avatarKey,
+                    modifier = Modifier.size(160.dp).testTag("profile_avatar_preview"))
             }
 
             ProfileCard {

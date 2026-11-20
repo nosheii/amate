@@ -26,6 +26,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import no.gruppe7.amate.feature.weather.data.LocalWeatherPlaceStore
 import no.gruppe7.amate.feature.weather.data.WeatherRepository
 import no.gruppe7.amate.feature.weather.location.LocationDataSource
 
@@ -34,8 +35,10 @@ fun WeatherRoute(repository: WeatherRepository, location: LocationDataSource) {
     val context = LocalContext.current
     val activity = LocalActivity.current
     // Route er koblingen mellom datadelen og kortet. Kortet selv kjenner ikke repository-et.
-    val factory = remember(repository, location) {
-        viewModelFactory { initializer { WeatherViewModel(repository, location = location) } }
+    val placeStore = remember(context) { LocalWeatherPlaceStore(context) }
+    var choosingPlace by rememberSaveable { mutableStateOf(false) }
+    val factory = remember(repository, location, placeStore) {
+        viewModelFactory { initializer { WeatherViewModel(repository, location = location, placeStore = placeStore) } }
     }
     val model: WeatherViewModel = viewModel(factory = factory)
     val state by model.uiState.collectAsStateWithLifecycle()
@@ -61,6 +64,7 @@ fun WeatherRoute(repository: WeatherRepository, location: LocationDataSource) {
         preferences.edit { putBoolean("denied", !granted) }
         permissionInFlight = false
         updatePermission()
+        if (granted) model.requestCurrentLocation()
     }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         // Tillatelsen kan være endret i Android-innstillingene mens appen var borte.
@@ -77,7 +81,12 @@ fun WeatherRoute(repository: WeatherRepository, location: LocationDataSource) {
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { model.stopLocating() }
     DisposableEffect(model) { onDispose { model.stopLocating() } }
 
-    WeatherCard(state = state, onRefresh = model::refresh, onLocationAction = {
+    if (choosingPlace) WeatherPlaceDialog(onDismiss = { choosingPlace = false }, onSelect = {
+        model.selectPlace(it)
+        choosingPlace = false
+    })
+    WeatherCard(state = state, onRefresh = model::refresh,
+        onChoosePlace = { choosingPlace = true }, onLocationAction = {
         when (state.locationStatus) {
             WeatherLocationStatus.SETTINGS_REQUIRED -> {
                 returningFromSettings = true

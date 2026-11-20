@@ -47,6 +47,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -74,6 +75,7 @@ fun StepsRoute(
     stepsRepository: StepsRepository,
     goalRepository: GoalRepository? = null,
     onOpenGoals: () -> Unit = {},
+    onTestNotification: (() -> Unit)? = null,
 ) {
     val viewModel = rememberStepsViewModel(stepsRepository, goalRepository)
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -83,6 +85,7 @@ fun StepsRoute(
         onPermissionResult = viewModel::onPermissionResult,
         onAddStep = viewModel::addStep,
         onOpenGoals = onOpenGoals,
+        onTestNotification = onTestNotification,
     )
 }
 
@@ -92,6 +95,7 @@ fun StepsScreen(
     onPermissionResult: (Boolean) -> Unit = {},
     onAddStep: (Int) -> Unit = {},
     onOpenGoals: () -> Unit = {},
+    onTestNotification: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val numbers = remember { NumberFormat.getIntegerInstance(Locale.forLanguageTag("nb-NO")) }
@@ -346,6 +350,19 @@ fun StepsScreen(
                                 Icon(Icons.AutoMirrored.Rounded.DirectionsRun, contentDescription = null, modifier = Modifier.size(16.dp))
                                 Spacer(Modifier.size(4.dp))
                                 Text(stringResource(R.string.steps_add_1000))
+                            }
+                        }
+                        if (onTestNotification != null) {
+                            OutlinedButton(
+                                onClick = onTestNotification,
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("steps_test_notification_button"),
+                            ) {
+                                Icon(Icons.Rounded.Notifications, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(Modifier.size(4.dp))
+                                Text(stringResource(R.string.steps_test_notification_button))
                             }
                         }
                     }

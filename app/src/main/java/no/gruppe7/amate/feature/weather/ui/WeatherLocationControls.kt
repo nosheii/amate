@@ -20,6 +20,7 @@ internal fun WeatherLocationControls(status: WeatherLocationStatus, onAction: ()
     // Kortet forklarer hvorfor vi trenger tilgang FØR Android sitt tillatelsesvindu åpnes.
     // Hvis posisjon mangler, skal det være umulig å forveksle Oslo med brukerens eget sted.
     val message = when (status) {
+        WeatherLocationStatus.MANUAL -> R.string.weather_location_manual
         WeatherLocationStatus.NEEDS_PERMISSION -> R.string.weather_location_intro
         WeatherLocationStatus.DENIED -> R.string.weather_location_denied
         WeatherLocationStatus.SETTINGS_REQUIRED -> R.string.weather_location_settings_required

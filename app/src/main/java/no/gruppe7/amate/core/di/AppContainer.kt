@@ -29,8 +29,11 @@ import no.gruppe7.amate.feature.water.data.RoomWaterRepository
 import no.gruppe7.amate.feature.water.data.WaterRepository
 import no.gruppe7.amate.feature.tasks.data.RoomTaskRepository
 import no.gruppe7.amate.feature.tasks.data.TaskRepository
+import no.gruppe7.amate.feature.steps.data.RoomStepReminderRepository
 import no.gruppe7.amate.feature.steps.data.RoomStepsRepository
+import no.gruppe7.amate.feature.steps.data.StepReminderRepository
 import no.gruppe7.amate.feature.steps.data.StepsRepository
+import no.gruppe7.amate.feature.steps.scheduling.StepReminderNotifications
 import no.gruppe7.amate.feature.steps.sensor.AndroidStepSensorDataSource
 import no.gruppe7.amate.feature.steps.sensor.StepSensorDataSource
 import no.gruppe7.amate.feature.achievements.data.AchievementRepository
@@ -115,8 +118,14 @@ class AppContainer(
         RoomStepsRepository(stepsDao, stepSensorDataSource, defaultScope)
     }
 
+    val stepReminderDao by lazy { database.stepReminderDao() }
+    val stepReminderRepository: StepReminderRepository by lazy {
+        RoomStepReminderRepository(stepReminderDao)
+    }
+
     // Android-delen lager kanalen, sjekker tillatelse og viser/fjerner varsler.
     val waterReminderNotifications by lazy { WaterReminderNotifications(context) }
+    val stepReminderNotifications by lazy { StepReminderNotifications(context) }
     // Bestiller én gjentakende jobb hos Android når lagrede påminnelser er på.
     val reminderScheduler by lazy { WorkManagerReminderScheduler(context, waterReminderNotifications) }
     // get() lager en ny Runner når den etterspørres. Da får den også en fersk standardklokke,

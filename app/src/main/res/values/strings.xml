@@ -163,4 +163,16 @@
     <string name="steps_history_empty">Ingen tidligere skrittdata registrert ennå.</string>
     <string name="steps_edit_goal">Endre mål</string>
     <string name="steps_register_steps">Registrer skritt</string>
+
+    <!-- Skrittpåminnelser -->
+    <string name="steps_reminders_channel_name">Skrittpåminnelser</string>
+    <string name="steps_reminders_channel_description">Påminnelser om å gå noen skritt i hverdagen.</string>
+    <string name="steps_reminders_notification_title">Tid for en liten gåtur?</string>
+    <string name="steps_reminders_notification_body">Du har gått %1$s skritt i dag. Ta noen flere skritt når det passer!</string>
+    <string name="steps_reminders_test_title">Amate – skrittvarsel</string>
+    <string name="steps_reminders_test_body">Du har gått %1$s skritt i dag. Trykk her for å åpne skrittelleren.</string>
+    <string name="steps_reminders_enable">Ønsker skrittpåminnelser</string>
+    <string name="steps_reminders_delivery_note">Påminnelsene fordeles gjennom tidsrommet for å minne deg på å ta noen skritt i løpet av dagen.</string>
+    <string name="steps_widget_today_summary">Du har gått %1$s skritt i dag</string>
+    <string name="steps_test_notification_button">Send testvarsel</string>
 </resources>
