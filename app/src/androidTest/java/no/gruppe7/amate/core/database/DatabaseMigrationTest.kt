@@ -212,7 +212,7 @@ class DatabaseMigrationTest {
             context.deleteDatabase(name)
         }
     }
-    @Test fun upgradeFrom6To7KeepsDataAndAddsAchievements() = runBlocking {
+    @Test fun upgradeFrom6To9KeepsDataAndAddsAchievements() = runBlocking {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val name = "migration-v6-${java.util.UUID.randomUUID()}.db"
         val legacy = Room.databaseBuilder(context, LegacyVersion6Database::class.java, name).build()
