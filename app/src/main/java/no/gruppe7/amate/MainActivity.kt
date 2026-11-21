@@ -66,6 +66,7 @@ class MainActivity : ComponentActivity() {
                     }
                     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
                         waterModel.refreshDay()
+                        stepsModel.refreshDay()
                         // Fanger også opp et ja/nei gitt i oppstarten eller i Androids innstillinger.
                         stepsModel.onPermissionResult(Build.VERSION.SDK_INT < 29 || ContextCompat.checkSelfPermission(
                             this@MainActivity, Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_GRANTED)
@@ -87,7 +88,7 @@ class MainActivity : ComponentActivity() {
                         },
                         settingsContent = {
                             ReminderSettingsRoute(container.reminderRepository)
-                            StepReminderSettingsRoute(container.stepReminderRepository)
+                            StepReminderSettingsRoute(container.stepReminderRepository, stepsState.stepsToday)
                         },
                         profileContent = {
                             val viewModel: ProfileViewModel = viewModel(
@@ -110,6 +111,7 @@ class MainActivity : ComponentActivity() {
                         navigationRequest = navigationRequest,
                         onNavigationHandled = {
                             handledWaterRequestId = waterRequestId(intent)
+                            handledStepsRequestId = stepsRequestId(intent)
                             navigationRequest = null
                         },
                     )

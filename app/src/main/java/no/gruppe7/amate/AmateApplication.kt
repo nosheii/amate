@@ -26,6 +26,15 @@ class AmateApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         applicationScope.launch {
+            container.stepReminderRepository.observeSettings(1).distinctUntilChanged()
+                .onEach { container.stepReminderScheduler.synchronize(it) }
+                .retryWhen { error, _ ->
+                    Log.w("AmateApplication", "Prøver skrittpåminnelsene igjen", error)
+                    delay(30_000)
+                    true
+                }.collect { }
+        }
+        applicationScope.launch {
             // Samme midlertidige bruker som vannskjermen. Profil kobles til senere.
             // Starter opp igjen etter omstart og reagerer på lagrede endringer fra alle skjermer.
             // distinctUntilChanged hopper over like verdier. Bare faktiske endringer trenger en ny synk.

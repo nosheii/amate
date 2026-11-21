@@ -175,4 +175,6 @@
     <string name="steps_reminders_delivery_note">Påminnelsene fordeles gjennom tidsrommet for å minne deg på å ta noen skritt i løpet av dagen.</string>
     <string name="steps_widget_today_summary">Du har gått %1$s skritt i dag</string>
     <string name="steps_test_notification_button">Send testvarsel</string>
+    <string name="steps_reminders_blocked">Skrittvarselet ble ikke sendt. Tillat varsler og skrittpåminnelser i Androids varselinnstillinger.</string>
+    <string name="steps_reminders_sent">Testvarselet er sendt til Android.</string>
 </resources>

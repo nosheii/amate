@@ -63,6 +63,37 @@ class StepsViewModelTest {
     }
 
     @Test
+    fun refreshAfterMidnightUsesNewDayForDisplayAndManualRegistration() = runTest {
+        val firstDay = java.time.LocalDate.of(2026, 11, 18).toEpochDay()
+        var current = java.time.Instant.parse("2026-11-18T20:00:00Z")
+        val clock = object : java.time.Clock() {
+            override fun instant() = current
+            override fun getZone() = java.time.ZoneId.of("Europe/Oslo")
+            override fun withZone(zone: java.time.ZoneId) = java.time.Clock.fixed(current, zone)
+        }
+        var writtenDay: Long? = null
+        val repository = object : StepsRepository {
+            override val isSensorAvailable = false
+            override fun getStepsForToday(userId: Long, epochDay: Long): Flow<Int> =
+                MutableStateFlow(if (epochDay == firstDay) 500 else 12)
+            override fun getStepsHistory(userId: Long): Flow<List<DailyStepsEntity>> = MutableStateFlow(emptyList())
+            override suspend fun incrementStep(userId: Long, count: Int, epochDay: Long) { writtenDay = epochDay }
+        }
+        val model = StepsViewModel(repository, clock = clock).also { store.put("rollover", it) }
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.uiState.collect {} }
+        runCurrent()
+        assertEquals(500, model.uiState.value.stepsToday)
+        current = current.plusSeconds(24 * 60 * 60)
+        model.refreshDay()
+        runCurrent()
+        assertEquals(12, model.uiState.value.stepsToday)
+        model.addStep(100)
+        runCurrent()
+        assertEquals(firstDay + 1, writtenDay)
+        store.clear()
+    }
+
+    @Test
     fun loadsInitialStepDataAndSensorAvailability() = stepsTest {
         val viewModel = model()
         runCurrent()
