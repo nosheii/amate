@@ -17,7 +17,7 @@ import java.util.UUID
 
 // Her ligger Android-delen av varslingen. Denne klassen bestemmer ikke når noe skal sendes.
 // Både bakgrunnsjobben og testknappen bruker den, men med ulike varsel-ID-er.
-class WaterReminderNotifications(context: Context) : WaterReminderNotifier {
+class WaterReminderNotifications(context: Context) : WaterReminderNotifier, no.gruppe7.amate.feature.reminders.ui.ReminderSettingsNotifier {
     // Vi beholder appens context, ikke en Activity som kanskje er lukket når jobben kjører.
     private val context = context.applicationContext
     // Androids innebygde tjeneste for å opprette kanaler og håndtere varsler.
@@ -45,7 +45,7 @@ class WaterReminderNotifications(context: Context) : WaterReminderNotifier {
 
     // Sender med én gang. Går ikke innom WorkManager eller telleren i Room.
     // Egen ID gjør at testvarselet ikke erstatter en vanlig vannpåminnelse.
-    fun showTestNotification(): Boolean = post(TEST_TAG, TEST_NOTIFICATION_ID,
+    override fun showTestNotification(): Boolean = post(TEST_TAG, TEST_NOTIFICATION_ID,
         context.getString(R.string.reminders_test_notification_title),
         context.getString(R.string.reminders_test_notification_body))
 

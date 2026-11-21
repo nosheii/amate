@@ -54,22 +54,30 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import no.gruppe7.amate.R
 import no.gruppe7.amate.feature.reminders.data.ReminderRepository
 import no.gruppe7.amate.feature.reminders.scheduling.WaterReminderNotifications
-import no.gruppe7.amate.feature.reminders.scheduling.WaterReminderNotifications.Companion.notificationsAllowed
 
 // Denne delen håndterer Android-tillatelser. Selve skjermen nedenfor viser bare data.
 // @Composable betyr at funksjonen beskriver UI som Compose kan tegne på nytt når state endres.
 // Route kobler ting sammen; Screen lenger nede inneholder selve knappene og feltene.
 @Composable
-fun ReminderSettingsRoute(repository: ReminderRepository) {
+fun ReminderSettingsRoute(
+    repository: ReminderRepository,
+    notifier: ReminderSettingsNotifier? = null,
+    modelKey: String = "water-reminders",
+    titleRes: Int = R.string.reminders_title,
+    enabledRes: Int = R.string.reminders_enable,
+    deliveryNoteRes: Int = R.string.reminders_delivery_note,
+    blockedRes: Int = R.string.reminders_test_blocked,
+    tagPrefix: String = "reminder",
+) {
     // remember beholder oppskriften mellom opptegninger så lenge repository-et er det samme.
     // viewModel() finner eller oppretter ViewModel-en; den lages ikke på nytt ved hvert tastetrykk.
     val factory = remember(repository) { RemindersViewModel.factory(repository) }
-    val model: RemindersViewModel = viewModel(factory = factory)
+    val model: RemindersViewModel = viewModel(key = modelKey, factory = factory)
     // Følger uiState når skjermen er aktiv. Nye verdier gjør at Compose oppdaterer visningen.
     val state by model.uiState.collectAsStateWithLifecycle()
     // Context gir tilgang til Android, f.eks. tillatelser, varsler og åpning av systeminnstillinger.
     val context = LocalContext.current
-    val notifications = remember(context) { WaterReminderNotifications(context) }
+    val notifications = remember(context, notifier) { notifier ?: WaterReminderNotifications(context) }
     // Dette er bare visningsvalg, ikke Room-data. rememberSaveable kan bevare dem ved rotasjon.
     // expanded styrer utfoldingen. testMessageResId velger teksten etter en varseltest.
     var expanded by rememberSaveable { mutableStateOf(false) }
@@ -83,7 +91,7 @@ fun ReminderSettingsRoute(repository: ReminderRepository) {
         testMessageResId = if (notifications.showTestNotification()) {
             R.string.reminders_test_sent
         } else {
-            R.string.reminders_test_blocked
+            blockedRes
         }
         model.updatePermission(notifications.isAllowed())
     }
@@ -98,25 +106,26 @@ fun ReminderSettingsRoute(repository: ReminderRepository) {
         } else {
             // Kom forespørselen fra bryteren, kan svaret endre bryteren i utkastet.
             // Brukeren må fremdeles trykke Lagre for å endre daglige påminnelser.
-            model.permissionResult(notificationsAllowed(context))
+            model.permissionResult(notifications.isAllowed())
         }
     }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         // Brukeren kan ha endret tillatelsen i telefonens innstillinger.
-        model.updatePermission(notificationsAllowed(context))
+        model.updatePermission(notifications.isAllowed())
     }
 
     // on... er handlinger vi sender inn til Screen. Screen sier hva som ble trykket,
     // mens Route/ViewModel bestemmer hva vi gjør med det.
     ReminderSettingsScreen(
         state = state,
+        titleRes = titleRes, enabledRes = enabledRes, deliveryNoteRes = deliveryNoteRes, tagPrefix = tagPrefix,
         expanded = expanded,
         onToggleExpanded = { expanded = !expanded },
         onEnabledChange = { enabled ->
             // Av krever ingen tillatelse. På kan kreve Androids dialog, eller hjelp via innstillingslenken.
             when {
                 !enabled -> model.changeEnabled(false)
-                notificationsAllowed(context) -> {
+                notifications.isAllowed() -> {
                     model.updatePermission(true)
                     model.changeEnabled(true)
                 }
@@ -172,29 +181,33 @@ fun ReminderSettingsScreen(
     onOpenSystemSettings: () -> Unit,
     onTestNotification: () -> Unit,
     testMessageResId: Int?,
+    titleRes: Int = R.string.reminders_title,
+    enabledRes: Int = R.string.reminders_enable,
+    deliveryNoteRes: Int = R.string.reminders_delivery_note,
+    tagPrefix: String = "reminder",
 ) {
     // Låser redigeringen mens data hentes/lagres, eller dersom innlasting feilet.
     // Testknappen er uavhengig: den trenger ikke gyldige innstillinger i Room.
     val controlsEnabled = !state.isLoading && !state.isSaving && !state.loadFailed
     // Disse tekstene brukes også av skjermleser, så utfolding og bryter blir forståelige uten å se.
     val expansionDescription = stringResource(if (expanded) R.string.reminders_expanded else R.string.reminders_collapsed)
-    val switchDescription = stringResource(R.string.reminders_enable)
+    val switchDescription = stringResource(enabledRes)
 
     // Card er boksen rundt alt. Modifier bestemmer størrelse, luft og testnavn.
     // testTag er et navn UI-testene kan finne; det er ikke synlig tekst i appen.
     Card(
-        modifier = Modifier.fillMaxWidth().testTag("reminder_settings_section"),
+        modifier = Modifier.fillMaxWidth().testTag("${tagPrefix}_settings_section"),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
     ) {
         TextButton(
             // Endrer bare om boksen er åpen. Det lagrer eller avbryter ikke utkastet.
             onClick = onToggleExpanded, enabled = !state.isSaving,
-            modifier = Modifier.fillMaxWidth().testTag("reminder_settings_toggle")
+            modifier = Modifier.fillMaxWidth().testTag("${tagPrefix}_settings_toggle")
                 .semantics { stateDescription = expansionDescription },
         ) {
             Row(Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(R.string.reminders_title), modifier = Modifier.weight(1f))
+                Text(stringResource(titleRes), modifier = Modifier.weight(1f))
                 Text(if (expanded) "−" else "+")
             }
         }
@@ -207,20 +220,20 @@ fun ReminderSettingsScreen(
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 16.dp)
-                    .testTag("reminder_settings_fields"),
+                    .testTag("${tagPrefix}_settings_fields"),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Text(stringResource(R.string.reminders_delivery_note), style = MaterialTheme.typography.bodySmall)
+                Text(stringResource(deliveryNoteRes), style = MaterialTheme.typography.bodySmall)
                 // Denne knappen tester bare varselvisningen, ikke bakgrunnsplanen.
                 OutlinedButton(onClick = onTestNotification,
-                    modifier = Modifier.fillMaxWidth().testTag("reminder_test_notification")) {
+                    modifier = Modifier.fillMaxWidth().testTag("${tagPrefix}_test_notification")) {
                     Text(stringResource(R.string.reminders_test_button))
                 }
                 Text(stringResource(R.string.reminders_test_hint), style = MaterialTheme.typography.bodySmall)
                 // ?.let viser tekst bare når vi har en melding etter et testtrykk.
                 // liveRegion lar skjermleser lese opp en ny melding uten at fokus må flyttes.
                 testMessageResId?.let {
-                    Text(stringResource(it), modifier = Modifier.testTag("reminder_test_result")
+                    Text(stringResource(it), modifier = Modifier.testTag("${tagPrefix}_test_result")
                         .semantics { liveRegion = LiveRegionMode.Polite },
                         style = MaterialTheme.typography.bodySmall)
                 }
@@ -234,7 +247,7 @@ fun ReminderSettingsScreen(
                             // Bryteren bestemmer ikke om Android faktisk har gitt varslingstillatelse.
                             checked = state.enabled, onCheckedChange = onEnabledChange,
                             enabled = controlsEnabled,
-                            modifier = Modifier.testTag("reminder_enabled")
+                            modifier = Modifier.testTag("${tagPrefix}_enabled")
                                 .semantics { contentDescription = switchDescription },
                         )
                     }
@@ -255,7 +268,7 @@ fun ReminderSettingsScreen(
                                 onClick = { onCountChange(count) },
                                 enabled = controlsEnabled,
                                 label = { Text(count.toString()) },
-                                modifier = Modifier.weight(1f).testTag("reminder_count_$count"),
+                                modifier = Modifier.weight(1f).testTag("${tagPrefix}_count_$count"),
                             )
                         }
                     }
@@ -267,13 +280,13 @@ fun ReminderSettingsScreen(
                             value = state.startTime, onValueChange = onStartChange,
                             label = { Text(stringResource(R.string.reminders_start)) },
                             singleLine = true, enabled = controlsEnabled,
-                            modifier = Modifier.weight(1f).testTag("reminder_start"),
+                            modifier = Modifier.weight(1f).testTag("${tagPrefix}_start"),
                         )
                         OutlinedTextField(
                             value = state.endTime, onValueChange = onEndChange,
                             label = { Text(stringResource(R.string.reminders_end)) },
                             singleLine = true, enabled = controlsEnabled,
-                            modifier = Modifier.weight(1f).testTag("reminder_end"),
+                            modifier = Modifier.weight(1f).testTag("${tagPrefix}_end"),
                         )
                     }
                     Text(stringResource(R.string.reminders_time_hint), style = MaterialTheme.typography.bodySmall)
@@ -286,7 +299,7 @@ fun ReminderSettingsScreen(
                     TextButton(onClick = onRetry) { Text(stringResource(R.string.water_retry)) }
                 }
                 if (state.saved) {
-                    Text(stringResource(R.string.reminders_saved), modifier = Modifier.testTag("reminder_saved"))
+                    Text(stringResource(R.string.reminders_saved), modifier = Modifier.testTag("${tagPrefix}_saved"))
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)) {
                     TextButton(onClick = onCancel, enabled = !state.isSaving) {
@@ -294,7 +307,7 @@ fun ReminderSettingsScreen(
                     }
                     // Ingen ulagrede endringer = ingen grunn til å lagre på nytt.
                     Button(onClick = onSave, enabled = controlsEnabled && state.hasChanges,
-                        modifier = Modifier.testTag("reminder_save")) {
+                        modifier = Modifier.testTag("${tagPrefix}_save")) {
                         Text(stringResource(if (state.isSaving) R.string.water_saving else R.string.reminders_save))
                     }
                 }
