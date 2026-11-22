@@ -16,7 +16,7 @@ class RoomDeleteUserRepository(
     private val database: AmateDatabase,
     private val onboarding: OnboardingRepository,
     // Sletter også innstillinger som ikke lagres i databasen.
-    private val clearLocalSettings: () -> Unit = {},
+    private val clearLocalSettings: suspend () -> Unit = {},
 ) : DeleteUserRepository {
     override suspend fun deleteEverything(userId: Long) {
         // slettingen gjennomføres alltid, selv om skjermen byttes udnerveis.
