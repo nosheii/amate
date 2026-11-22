@@ -39,6 +39,7 @@ import no.gruppe7.amate.R
 import no.gruppe7.amate.feature.home.ui.HomeIcons
 import no.gruppe7.amate.feature.home.ui.HomeScreen
 import no.gruppe7.amate.feature.home.ui.HomeShellTheme
+import no.gruppe7.amate.feature.tasks.ui.TasksUiState
 import no.gruppe7.amate.feature.steps.ui.StepsUiState
 import no.gruppe7.amate.feature.water.ui.WaterUiState
 import no.gruppe7.amate.feature.weather.ui.WeatherCard
@@ -60,6 +61,9 @@ fun AmateShell(
     onNavigationHandled: () -> Unit = {},
     weatherContent: @Composable () -> Unit = { WeatherCard() },
     avatarKey: String = "",
+    tasksState: TasksUiState = TasksUiState(),
+    onRetryTasks: () -> Unit = {},
+    onPrepareNewTask: () -> Unit = {},
 ) {
     // En liten, midlertidig skjermvelger, ikke gruppas ferdige navigasjonsløsning.
     // rememberSaveable beholder valgt skjerm ved for eksempel rotasjon av telefonen.
@@ -134,6 +138,12 @@ fun AmateShell(
                         onRetryWater = onRetryWater,
                         weatherContent = weatherContent,
                         avatarKey = avatarKey,
+                        tasksState = tasksState,
+                        onRetryTasks = onRetryTasks,
+                        onAddTask = {
+                            onPrepareNewTask()
+                            destination = AppDestination.TASKS
+                        },
                     )
                     AppDestination.WATER -> waterContent()
                     AppDestination.PROFILE -> profileContent()

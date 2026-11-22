@@ -27,6 +27,7 @@ import no.gruppe7.amate.feature.steps.ui.rememberStepsViewModel
 import no.gruppe7.amate.feature.water.ui.WaterRoute
 import no.gruppe7.amate.feature.profile.ui.ProfileViewModel
 import no.gruppe7.amate.feature.profile.ui.ProfileRoute
+import no.gruppe7.amate.feature.tasks.ui.rememberTasksViewModel
 import no.gruppe7.amate.feature.tasks.ui.TasksRoute
 import no.gruppe7.amate.feature.water.ui.rememberWaterViewModel
 import no.gruppe7.amate.feature.reminders.ui.ReminderSettingsRoute
@@ -60,12 +61,16 @@ class MainActivity : ComponentActivity() {
                     val waterState by waterModel.uiState.collectAsStateWithLifecycle()
                     val stepsModel = rememberStepsViewModel(container.stepsRepository, container.goalRepository)
                     val stepsState by stepsModel.uiState.collectAsStateWithLifecycle()
+                    // Samme modell gir hjemkortet og gjøremålslisten oppdateringer fra Room.
+                    val tasksModel = rememberTasksViewModel(container.taskRepository)
+                    val tasksState by tasksModel.uiState.collectAsStateWithLifecycle()
                     DisposableEffect(stepsModel) {
                         // Hvis profilen nullstilles og hjem forsvinner, stopper også sensorlytteren.
                         onDispose { stepsModel.onPermissionResult(false) }
                     }
                     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
                         waterModel.refreshDay()
+                        tasksModel.refreshDay()
                         stepsModel.refreshDay()
                         // Fanger også opp et ja/nei gitt i oppstarten eller i Androids innstillinger.
                         stepsModel.onPermissionResult(Build.VERSION.SDK_INT < 29 || ContextCompat.checkSelfPermission(
@@ -104,7 +109,10 @@ class MainActivity : ComponentActivity() {
                             ProgressRoute(container.waterRepository, container.goalRepository, openGoals, openWater,
                                 stepsRepository = container.stepsRepository, onOpenSteps = openSteps)
                         },
-                        tasksContent = { TasksRoute(container.taskRepository) },
+                        tasksContent = { TasksRoute(container.taskRepository, model = tasksModel) },
+                        tasksState = tasksState,
+                        onRetryTasks = tasksModel::retry,
+                        onPrepareNewTask = { tasksModel.openEditor() },
                         waterState = waterState,
                         stepsState = stepsState,
                         onRetryWater = waterModel::retry,

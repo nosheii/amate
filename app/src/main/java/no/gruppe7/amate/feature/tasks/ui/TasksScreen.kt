@@ -56,9 +56,15 @@ import no.gruppe7.amate.ui.theme.AmateTheme
 
 // Kobler ViewModel til skjermen. Det er denne navigasjonen skal vise.
 @Composable
-fun TasksRoute(repository: TaskRepository, modifier: Modifier = Modifier) {
+fun rememberTasksViewModel(repository: TaskRepository): TasksViewModel {
     val factory = remember(repository) { TasksViewModel.factory(repository) }
-    val model: TasksViewModel = viewModel(factory = factory)
+    return viewModel(factory = factory)
+}
+
+@Composable
+fun TasksRoute(repository: TaskRepository, modifier: Modifier = Modifier,
+    model: TasksViewModel = rememberTasksViewModel(repository),
+) {
     val state by model.uiState.collectAsStateWithLifecycle()
     // Sjekker om det har blitt ny dag hver gang skjermen vises igjen.
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { model.refreshDay() }
