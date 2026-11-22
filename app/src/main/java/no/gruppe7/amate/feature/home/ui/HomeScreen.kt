@@ -54,6 +54,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.gruppe7.amate.R
+import no.gruppe7.amate.feature.tasks.ui.TasksUiState
 import no.gruppe7.amate.feature.profile.ui.AvatarImage
 import no.gruppe7.amate.feature.steps.ui.StepsUiState
 import no.gruppe7.amate.feature.water.ui.WaterGoalSummary
@@ -97,6 +98,9 @@ fun HomeScreen(
     onRetryWater: () -> Unit = {},
     weatherContent: @Composable () -> Unit = { WeatherCard() },
     avatarKey: String = "",
+    tasksState: TasksUiState = TasksUiState(),
+    onRetryTasks: () -> Unit = {},
+    onAddTask: () -> Unit = onOpenTasks,
 ) {
     // Forsiden får en ferdig tilstand fra vannmodellen. Jeg gjør ikke egne databasekall her.
     // Da kan vannkortet vise ekte tall, mens resten av forsiden fortsatt er et skall.
@@ -185,10 +189,7 @@ fun HomeScreen(
                     Text(stringResource(R.string.home_today), color = Moss,
                         style= MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold,
                         modifier = Modifier.weight(1f))
-                    // Gjøremålene har egen skjerm. Forsiden lenker bare dit.
-                    TextButton(onClick = onOpenTasks, modifier = Modifier.testTag("home_open_tasks")) {
-                        Text(stringResource(R.string.home_open_tasks))
-                    }
+
                 }
 
             }
@@ -276,12 +277,56 @@ fun HomeScreen(
                 }
             }
             item {
+                HomeTasksCard(tasksState, onOpenTasks, onAddTask, onRetryTasks)
+            }
+            item {
                 // De små kortene speiler mockupen. Ingen streak eller merker beregnes ennå.
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     SummaryCard(HomeIcons.Flame, R.string.home_streak, Color(0xFFB96523), Modifier.weight(1f))
                     SummaryCard(HomeIcons.Trophy, R.string.home_achievements, Color(0xFFAA7C20), Modifier.weight(1f))
                 }
             }
+        }
+    }
+}
+
+// Samme kort, ikonfelt og knappestil som de andre tellerne. Tallene kommer fra gjøremålslisten.
+@Composable
+private fun HomeTasksCard(state: TasksUiState, onOpen: () -> Unit, onAdd: () -> Unit, onRetry: () -> Unit) {
+    HomeCard(modifier = Modifier.testTag("home_tasks_card")) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            IconTile(HomeIcons.Tasks, Color(0xFFE4EBCB), Moss)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(stringResource(R.string.home_tasks_today), fontWeight = FontWeight.Bold)
+                when {
+                    state.isLoading -> CircularProgressIndicator(Modifier.size(24.dp))
+                    state.loadFailed -> {
+                        Text(stringResource(R.string.tasks_load_error), color = MaterialTheme.colorScheme.error)
+                        TextButton(onClick = onRetry, modifier = Modifier.testTag("home_tasks_retry")) {
+                            Text(stringResource(R.string.water_retry))
+                        }
+                    }
+                    state.tasks.isEmpty() -> Text(stringResource(R.string.home_tasks_empty),
+                        style = MaterialTheme.typography.bodyMedium, modifier = Modifier.testTag("home_tasks_empty"))
+                    else -> {
+                        Text(stringResource(R.string.home_tasks_completed, state.completedCount, state.tasks.size),
+                            color = Moss, fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleLarge, modifier = Modifier.testTag("home_tasks_total"))
+                        LinearProgressIndicator(progress = { state.progress },
+                            modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape).testTag("home_tasks_progress"),
+                            color = Moss, trackColor = Color(0xFFE9E4D3))
+                        if (state.completedCount == state.tasks.size) Text(stringResource(R.string.home_tasks_all_done),
+                            style = MaterialTheme.typography.bodySmall, modifier = Modifier.testTag("home_tasks_all_done"))
+                    }
+                }
+            }
+        }
+        val empty = !state.isLoading && !state.loadFailed && state.tasks.isEmpty()
+        Button(onClick = if (empty) onAdd else onOpen,
+            modifier = Modifier.fillMaxWidth().testTag("home_open_tasks"),
+            colors = ButtonDefaults.buttonColors(containerColor = Moss),
+            shape = RoundedCornerShape(16.dp), contentPadding = PaddingValues(14.dp)) {
+            Text(stringResource(if (empty) R.string.tasks_add else R.string.home_tasks_open))
         }
     }
 }

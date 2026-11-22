@@ -177,4 +177,9 @@
     <string name="steps_test_notification_button">Send testvarsel</string>
     <string name="steps_reminders_blocked">Skrittvarselet ble ikke sendt. Tillat varsler og skrittpåminnelser i Androids varselinnstillinger.</string>
     <string name="steps_reminders_sent">Testvarselet er sendt til Android.</string>
+    <string name="home_tasks_today">Gjøremål i dag</string>
+    <string name="home_tasks_completed">%1$d av %2$d fullført</string>
+    <string name="home_tasks_empty">Ingen gjøremål i dag</string>
+    <string name="home_tasks_all_done">Alle dagens gjøremål er fullført!</string>
+    <string name="home_tasks_open">Se gjøremål</string>
 </resources>
