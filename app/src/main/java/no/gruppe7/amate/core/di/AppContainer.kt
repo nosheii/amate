@@ -6,7 +6,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import no.gruppe7.amate.feature.weather.data.NetworkWeatherRepository
-import no.gruppe7.amate.feature.weather.data.WeatherRepository
 import no.gruppe7.amate.feature.weather.data.remote.MetWeatherApiService
 import no.gruppe7.amate.feature.weather.location.AndroidLocationDataSource
 import no.gruppe7.amate.feature.weather.location.LocationDataSource
@@ -52,7 +51,7 @@ class AppContainer(
     // Bare en engangsforespørsel når værkortet trenger posisjonen. Starter ingen sporing her.
     val weatherLocation: LocationDataSource by lazy { AndroidLocationDataSource(context) }
 
-    val weatherRepository: WeatherRepository by lazy {
+    val weatherRepository: NetworkWeatherRepository by lazy {
         // HTTP-cache er ikke en Room-tabell. Den lagrer nettverkssvar som kan slettes trygt.
         // Selve nettklienten ordner mellomlagringen på IO når den får en forespørsel.
         NetworkWeatherRepository(MetWeatherApiService(
@@ -91,6 +90,7 @@ class AppContainer(
     val deleteUserRepository: DeleteUserRepository by lazy {
         RoomDeleteUserRepository(database, onboardingRepository) {
             LocalWeatherPlaceStore(context).save(null)
+            weatherRepository.clearUserData()
         }
     }
 

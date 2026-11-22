@@ -310,6 +310,36 @@ class WeatherLocationViewModelTest {
         assertFalse(model.uiState.value.isLoading)
     }
 
+    @Test fun deletingUser_clearsRetainedManualPlaceAndForecast() = runTest {
+        val saved = MemoryPlaceStore(bergen)
+        val model = model(saved)
+        runCurrent()
+        assertEquals(bergen, model.uiState.value.place)
+        saved.save(null)
+        weather.resets.value += 1
+        runCurrent()
+        assertEquals(WeatherPlace.OSLO, model.uiState.value.place)
+        assertNull(model.uiState.value.forecast)
+        model.onLocationPermission(false)
+        runCurrent()
+        assertEquals(WeatherPlace.OSLO, weather.places.last())
+        assertEquals(WeatherLocationStatus.NEEDS_PERMISSION, model.uiState.value.locationStatus)
+    }
+
+    @Test fun deletingUser_preventsLateWeatherResponseFromRestoringOldPlace() = runTest {
+        val gate = CompletableDeferred<Unit>()
+        weather.osloGate = gate
+        val model = model()
+        model.onLocationPermission(false)
+        runCurrent()
+        weather.resets.value += 1
+        runCurrent()
+        gate.complete(Unit)
+        runCurrent()
+        assertNull(model.uiState.value.forecast)
+        assertFalse(model.uiState.value.isLoading)
+    }
+
     private class FakeLocation : LocationDataSource {
         var calls = 0
         var waitForever = false
@@ -325,6 +355,7 @@ class WeatherLocationViewModelTest {
     }
 
     private class FakeWeather : WeatherRepository {
+        override val resets = kotlinx.coroutines.flow.MutableStateFlow(0)
         val places = mutableListOf<WeatherPlace>()
         var osloGate: CompletableDeferred<Unit>? = null
         override suspend fun getWeather(place: WeatherPlace): WeatherForecast {

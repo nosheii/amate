@@ -11,6 +11,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.withTimeoutOrNull
@@ -41,6 +42,19 @@ class WeatherViewModel(
     // I appen sjekker Route tillatelsen først. Da slipper vi å hente Oslo før vi vet
     // at brukeren allerede har gitt tilgang til sin egen posisjon.
     init {
+        // Activity beholder denne modellen gjennom ny oppstart etter sletting.
+        viewModelScope.launch {
+            repository.resets.drop(1).collect {
+                stopLocating()
+                cancelWeatherRequest()
+                manualPlace = null
+                lastAttempt = null
+                permissionGranted = false
+                _uiState.value = WeatherUiState(place = place,
+                    isLoading = false,
+                    locationStatus = if (location == null) null else WeatherLocationStatus.NEEDS_PERMISSION)
+            }
+        }
         if (manualPlace != null) {
             _uiState.update { it.copy(locationStatus = WeatherLocationStatus.MANUAL) }
             fetchWeather()
