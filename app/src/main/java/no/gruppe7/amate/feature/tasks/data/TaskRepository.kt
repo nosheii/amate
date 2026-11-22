@@ -12,7 +12,7 @@ const val MAX_TITLE_LENGTH = 60
 interface TaskRepository {
 
     // Følger med på gjøremålene for en dag.
-    fun observeTasksForDay(userId: Long, startMillis: Long, EndMillis: Long): Flow<List<SelfCareTaskEntity>>
+    fun observeTasksForDay(userId: Long, startMillis: Long, endMillis: Long): Flow<List<SelfCareTaskEntity>>
 
     // Lager et nytt gjøremål for en dag. Returnerer ID-en.
     suspend fun addTask(userId: Long, title: String, scheduledForMillis: Long): Long
@@ -24,6 +24,8 @@ interface TaskRepository {
     suspend fun setCompleted(task: SelfCareTaskEntity, completed: Boolean, nowMillis: Long)
 
     suspend fun delete(task: SelfCareTaskEntity)
+
+    fun observeCompletedCount(userId: Long): Flow<Int>
 }
 
 // Den ekte versjone som bruker Room.
@@ -52,6 +54,8 @@ class RoomTaskRepository(
     }
 
     override suspend fun delete(task: SelfCareTaskEntity) = taskDao.delete(task)
+
+    override fun observeCompletedCount(userId: Long) = taskDao.observeCompletedCount(userId)
 
     // Fjerner mellomrom rundt og nektet tom eller for lang tekst
     // require() kaster IllegalArgumentException, som ViewModel fanger i write {}.

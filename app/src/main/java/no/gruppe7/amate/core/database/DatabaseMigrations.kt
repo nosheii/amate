@@ -128,7 +128,7 @@ val MIGRATION_5_6 = object : Migration(5, 6) {
         )
     }
 }
-
+// Versjon 7 (Felix): innstillinger for skrittpåminnelser.
 val MIGRATION_6_7 = object : Migration(6, 7) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL(
@@ -145,7 +145,7 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
     }
 }
 
-// Beholder alle gamle tabeller og innstillinger, også installasjoner som allerede har versjon 7.
+// Versjon 8 (Nora): beholder alle gamle tabeller og innstillinger, også installasjoner som allerede har versjon 7.
 val MIGRATION_7_8 = object : Migration(7, 8) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL("""
@@ -161,6 +161,24 @@ val MIGRATION_7_8 = object : Migration(7, 8) {
     }
 }
 
+// Versjon 9: tabellen for prestasjoner brukeren har tatt. Katalogen ligger i kode, så bare denne trengs.
+// Merkene lå først på 7, men skrittpåminnelsene (7 og 8) kom inn i main først, så vi rykket opp til 9.
+// Kolonnene må matche UserAchievementEntity nøyaktig, ellers nekter Room å åpne databasen.
+val MIGRATION_8_9 = object : Migration(8, 9) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS user_achievements (
+                userId INTEGER NOT NULL,
+                code TEXT NOT NULL,
+                earnedAtMillis INTEGER NOT NULL,
+                PRIMARY KEY(userId, code)
+            )
+            """.trimIndent()
+        )
+    }
+}
+
 // Appen og testene bruker samme liste, så en ny oppgraderingsvei ikke glemmes ett sted.
 // Room velger den direkte 2 → 4-veien når den finnes. Den gamle 2 → 3 beholdes uendret.
-val ALL_DATABASE_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_2_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
+val ALL_DATABASE_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_2_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9)
