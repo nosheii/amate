@@ -14,6 +14,9 @@ import androidx.room.Room
 import no.gruppe7.amate.core.database.AmateDatabase
 import no.gruppe7.amate.feature.profile.data.ProfileRepository
 import no.gruppe7.amate.feature.profile.data.RoomProfileRepository
+import no.gruppe7.amate.feature.profile.data.DeleteUserRepository
+import no.gruppe7.amate.feature.profile.data.RoomDeleteUserRepository
+import no.gruppe7.amate.feature.weather.data.LocalWeatherPlaceStore
 import no.gruppe7.amate.feature.onboarding.data.AndroidOnboardingCompletionStore
 import no.gruppe7.amate.feature.onboarding.data.OnboardingRepository
 import no.gruppe7.amate.feature.onboarding.data.RoomOnboardingRepository
@@ -79,6 +82,14 @@ class AppContainer(
     // Oppstarten gjenbruker profil og mål. Ingen ny database eller ny bruker-ID er nødvendig.
     val onboardingRepository: OnboardingRepository by lazy {
         RoomOnboardingRepository(database, profileRepository, goalRepository, AndroidOnboardingCompletionStore(context))
+    }
+
+    // "Slett bruker" i innstillinger, sletter alt Amate har lagret
+    // sender bruker tilbake til oppstartssiden
+    val deleteUserRepository: DeleteUserRepository by lazy {
+        RoomDeleteUserRepository(database, onboardingRepository) {
+            LocalWeatherPlaceStore(context).save(null)
+        }
     }
 
     // Gir enkel tilgang til WaterDao.
