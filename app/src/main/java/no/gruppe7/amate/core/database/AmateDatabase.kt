@@ -22,6 +22,8 @@ import no.gruppe7.amate.feature.steps.data.local.StepReminderEntity
 import no.gruppe7.amate.feature.steps.data.local.StepReminderDeliveryEntity
 import no.gruppe7.amate.feature.steps.data.local.StepReminderDeliveryDao
 import no.gruppe7.amate.feature.steps.data.local.StepReminderDao
+import no.gruppe7.amate.feature.achievements.data.local.AchievementDao
+import no.gruppe7.amate.feature.achievements.data.local.UserAchievementEntity
 
 // Dette er hoveddatabasen til appen.
 // Her registrerer vi tabellene og DAO-ene som Room skal kjenne til.
@@ -39,12 +41,14 @@ import no.gruppe7.amate.feature.steps.data.local.StepReminderDao
         DailyStepsEntity::class,
         StepReminderEntity::class,
         StepReminderDeliveryEntity::class,
+        UserAchievementEntity::class,
     ],
 
     // main var på 3. Den samlede versjonen med mål og gjøremål blir derfor 4.
     // Versjon 5: Skritt. versjon 6: Profil og avatar. versjon 7: Skrittpåminnelser.
     // Versjon 8 husker sendte skrittpåminnelser adskilt fra vannvarsler.
-    version = 8,
+    // Versjon 9: Prestasjoner brukeren har tatt.
+    version = 9,
     exportSchema = false,
 )
 abstract class AmateDatabase : RoomDatabase() {
@@ -75,4 +79,7 @@ abstract class AmateDatabase : RoomDatabase() {
     // Tilgang til skrittpåminnelser.
     abstract fun stepReminderDao(): StepReminderDao
     abstract fun stepReminderDeliveryDao(): StepReminderDeliveryDao
+
+    // Tilgang til merkene brukeren har tatt.
+    abstract fun achievementDao(): AchievementDao
 }

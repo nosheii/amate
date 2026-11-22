@@ -22,6 +22,7 @@ import no.gruppe7.amate.core.navigation.AppDestination
 import no.gruppe7.amate.core.navigation.AmateShell
 import no.gruppe7.amate.feature.goals.ui.GoalsRoute
 import no.gruppe7.amate.feature.steps.ui.StepReminderSettingsRoute
+import no.gruppe7.amate.feature.profile.ui.DeleteUserSection
 import no.gruppe7.amate.feature.steps.ui.StepsRoute
 import no.gruppe7.amate.feature.steps.ui.rememberStepsViewModel
 import no.gruppe7.amate.feature.water.ui.WaterRoute
@@ -94,6 +95,7 @@ class MainActivity : ComponentActivity() {
                         settingsContent = {
                             ReminderSettingsRoute(container.reminderRepository)
                             StepReminderSettingsRoute(container.stepReminderRepository, stepsState.stepsToday)
+                            DeleteUserSection(onDelete = { container.deleteUserRepository.deleteEverything(1L) })
                         },
                         profileContent = {
                             val viewModel: ProfileViewModel = viewModel(

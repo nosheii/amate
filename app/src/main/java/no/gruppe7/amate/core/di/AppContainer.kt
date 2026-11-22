@@ -14,6 +14,9 @@ import androidx.room.Room
 import no.gruppe7.amate.core.database.AmateDatabase
 import no.gruppe7.amate.feature.profile.data.ProfileRepository
 import no.gruppe7.amate.feature.profile.data.RoomProfileRepository
+import no.gruppe7.amate.feature.profile.data.DeleteUserRepository
+import no.gruppe7.amate.feature.profile.data.RoomDeleteUserRepository
+import no.gruppe7.amate.feature.weather.data.LocalWeatherPlaceStore
 import no.gruppe7.amate.feature.onboarding.data.AndroidOnboardingCompletionStore
 import no.gruppe7.amate.feature.onboarding.data.OnboardingRepository
 import no.gruppe7.amate.feature.onboarding.data.RoomOnboardingRepository
@@ -36,6 +39,8 @@ import no.gruppe7.amate.feature.steps.data.StepsRepository
 import no.gruppe7.amate.feature.steps.scheduling.StepReminderNotifications
 import no.gruppe7.amate.feature.steps.sensor.AndroidStepSensorDataSource
 import no.gruppe7.amate.feature.steps.sensor.StepSensorDataSource
+import no.gruppe7.amate.feature.achievements.data.AchievementRepository
+import no.gruppe7.amate.feature.achievements.data.RoomAchievementRepository
 
 // Her oppretter vi felles objekter som resten av appen trenger.
 // I stedet for at hver skjerm bygger sin egen database, henter de ting herfra.
@@ -81,6 +86,14 @@ class AppContainer(
         RoomOnboardingRepository(database, profileRepository, goalRepository, AndroidOnboardingCompletionStore(context))
     }
 
+    // "Slett bruker" i innstillinger, sletter alt Amate har lagret
+    // sender bruker tilbake til oppstartssiden
+    val deleteUserRepository: DeleteUserRepository by lazy {
+        RoomDeleteUserRepository(database, onboardingRepository) {
+            LocalWeatherPlaceStore(context).save(null)
+        }
+    }
+
     // Gir enkel tilgang til WaterDao.
     val waterDao by lazy { database.waterDao() }
 
@@ -98,6 +111,10 @@ class AppContainer(
     val taskDao by lazy {database.selfCareTaskDao()}
 
     val taskRepository: TaskRepository by lazy { RoomTaskRepository(taskDao) }
+
+    // Merker leser fra vann, skritt og gjøremål, men lagrer bare hva som er tatt.
+    val achievementDao by lazy { database.achievementDao() }
+    val achievementRepository: AchievementRepository by lazy { RoomAchievementRepository(achievementDao) }
 
     private val defaultScope by lazy {
         externalScope ?: CoroutineScope(SupervisorJob() + Dispatchers.IO)

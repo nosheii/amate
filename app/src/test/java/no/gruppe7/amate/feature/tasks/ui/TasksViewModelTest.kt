@@ -184,7 +184,11 @@ private class FakeTaskRepository : TaskRepository {
     var failWrite = false
     private var nextId = 1L
 
-    override fun observeTasksForDay(userId: Long, startMillis: Long, endMillis: Long): Flow<List<SelfCareTaskEntity>> {
+    override fun observeTasksForDay(
+        userId: Long,
+        startMillis: Long,
+        endMillis: Long
+    ): Flow<List<SelfCareTaskEntity>> {
         if (failRead) return flow { error("Test: kunne ikke lese") }
         return tasks.map { all ->
             all.filter { it.userId == userId && it.scheduledForMillis >= startMillis && it.scheduledForMillis < endMillis }
@@ -195,24 +199,42 @@ private class FakeTaskRepository : TaskRepository {
     override suspend fun addTask(userId: Long, title: String, scheduledForMillis: Long): Long {
         check(!failWrite)
         val id = nextId++
-        tasks.value += SelfCareTaskEntity(id = id, userId = userId, title = title.trim(), scheduledForMillis = scheduledForMillis)
+        tasks.value += SelfCareTaskEntity(
+            id = id,
+            userId = userId,
+            title = title.trim(),
+            scheduledForMillis = scheduledForMillis
+        )
         return id
     }
 
     override suspend fun rename(task: SelfCareTaskEntity, title: String) {
         check(!failWrite)
-        tasks.value = tasks.value.map { if (it.id == task.id) it.copy(title = title.trim()) else it }
+        tasks.value =
+            tasks.value.map { if (it.id == task.id) it.copy(title = title.trim()) else it }
     }
 
-    override suspend fun setCompleted(task: SelfCareTaskEntity, completed: Boolean, nowMillis: Long) {
+    override suspend fun setCompleted(
+        task: SelfCareTaskEntity,
+        completed: Boolean,
+        nowMillis: Long
+    ) {
         check(!failWrite)
         tasks.value = tasks.value.map {
-            if (it.id == task.id) it.copy(isCompleted = completed, completedAtMillis = if (completed) nowMillis else null) else it
+            if (it.id == task.id) it.copy(
+                isCompleted = completed,
+                completedAtMillis = if (completed) nowMillis else null
+            ) else it
         }
     }
 
     override suspend fun delete(task: SelfCareTaskEntity) {
         check(!failWrite)
         tasks.value = tasks.value.filterNot { it.id == task.id }
+    }
+
+    // Teller på samme måte som SQL-spørringen i SelfCareTaskDao, så testen speiler den ekte.
+    override fun observeCompletedCount(userId: Long): Flow<Int> {
+        return tasks.map { all -> all.count { it.userId == userId && it.isCompleted } }
     }
 }
