@@ -79,7 +79,7 @@ class HomeScreenTest {
     fun tasksShortcutOpensTasksAndBackReturnsHome() {
         // Finn selve gjøremål-knappen, ikke målknappen som ligger lenger ned på forsiden.
         compose.onNodeWithTag("home_list").performScrollToNode(hasTestTag("home_open_tasks"))
-        compose.onNodeWithTag("home_open_tasks").assertTextEquals("Gjøremål").performClick()
+        compose.onNodeWithTag("home_open_tasks").assertTextEquals("Se gjøremål").performClick()
         compose.onNodeWithText("Gjøremål").assertIsDisplayed()
         compose.onNodeWithText("Gjøremål for test").assertIsDisplayed()
         compose.onNodeWithTag("home_tab_home").assertIsSelected()
