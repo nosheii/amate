@@ -118,6 +118,10 @@ fun ProfileScreen(
                     value = uiState.displayName,
                     onValueChange = onNameChanged,
                     label = { Text(stringResource(R.string.profile_name)) },
+                    isError = uiState.nameError,
+                    supportingText = if (uiState.nameError) {
+                        { Text(stringResource(R.string.profile_name_error)) }
+                    } else null,
                     colors = fieldColors(),
                     modifier = Modifier.fillMaxWidth().testTag("profile_name")
                 )

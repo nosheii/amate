@@ -13,8 +13,7 @@ import no.gruppe7.amate.feature.profile.data.AvatarKeys
 import no.gruppe7.amate.feature.profile.data.ProfileRepository
 import no.gruppe7.amate.feature.profile.data.local.AvatarConfigEntity
 import no.gruppe7.amate.feature.profile.data.local.UserProfileEntity
-
-const val ONBOARDING_NAME_MAX_LENGTH = 40
+import no.gruppe7.amate.feature.profile.data.validProfileNameOrNull
 
 data class OnboardingDraft(
     val name: String = "",
@@ -60,8 +59,7 @@ class RoomOnboardingRepository(
     }
 
     override suspend fun complete(userId: Long, draft: OnboardingDraft) {
-        val name = draft.name.trim()
-        require(name.isNotBlank() && name.length <= ONBOARDING_NAME_MAX_LENGTH)
+        val name = requireNotNull(validProfileNameOrNull(draft.name))
         require(draft.avatarKey in AvatarKeys.all)
         require(draft.waterGoal == null || draft.waterGoal in GoalType.WATER.validRange)
         require(draft.stepsGoal == null || draft.stepsGoal in GoalType.STEPS.validRange)
