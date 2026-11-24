@@ -19,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -52,7 +53,7 @@ fun AmateShell(
     goalsContent: @Composable () -> Unit = {},
     stepsContent: @Composable () -> Unit = {},
     // Fremgang får snarveiene fra skallet. Skjermen trenger ikke selv styre navigasjonen.
-    progressContent: @Composable (onOpenGoals: () -> Unit, onOpenWater: () -> Unit, onOpenSteps: () -> Unit) -> Unit = { _, _, _ -> },
+    progressContent: @Composable (onOpenWater: () -> Unit, onOpenSteps: () -> Unit) -> Unit = { _, _ -> },
     tasksContent: @Composable () -> Unit = {},
     waterState: WaterUiState = WaterUiState(),
     stepsState: StepsUiState = StepsUiState(),
@@ -77,8 +78,10 @@ fun AmateShell(
             onNavigationHandled()
         }
     }
-    val goHome = { destination = AppDestination.HOME }
-    BackHandler(enabled = destination != AppDestination.HOME, onBack = goHome)
+    val goBack = {
+        destination = if (destination == AppDestination.GOALS) AppDestination.SETTINGS else AppDestination.HOME
+    }
+    BackHandler(enabled = destination != AppDestination.HOME, onBack = goBack)
 
     HomeShellTheme {
         Scaffold(
@@ -87,8 +90,10 @@ fun AmateShell(
                     Surface {
                         Row(Modifier.fillMaxWidth().statusBarsPadding().heightIn(min = 56.dp),
                             verticalAlignment = Alignment.CenterVertically) {
-                            IconButton(onClick = goHome) {
-                                Icon(HomeIcons.Back, stringResource(R.string.home_back))
+                            IconButton(onClick = goBack) {
+                                Icon(HomeIcons.Back, stringResource(
+                                    if (destination == AppDestination.GOALS) R.string.settings_back else R.string.home_back
+                                ))
                             }
                             Text(stringResource(destination.title()), fontWeight = FontWeight.Bold,
                                 style = MaterialTheme.typography.titleLarge)
@@ -129,7 +134,6 @@ fun AmateShell(
                     AppDestination.HOME -> HomeScreen(
                         onOpenWater = { destination = AppDestination.WATER },
                         onOpenSettings = { destination = AppDestination.SETTINGS },
-                        onOpenGoals = { destination = AppDestination.GOALS },
                         onOpenSteps = { destination = AppDestination.STEPS },
                         // Knappen på forsiden skal åpne gjøremål, ikke bare se klikkbar ut.
                         onOpenTasks = { destination = AppDestination.TASKS },
@@ -149,7 +153,6 @@ fun AmateShell(
                     AppDestination.PROFILE -> profileContent()
                     AppDestination.STEPS -> stepsContent()
                     AppDestination.PROGRESS -> progressContent(
-                        { destination = AppDestination.GOALS },
                         { destination = AppDestination.WATER },
                         { destination = AppDestination.STEPS },
                     )
@@ -158,8 +161,12 @@ fun AmateShell(
                     AppDestination.SETTINGS -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
                         Column(Modifier.widthIn(max = 600.dp).fillMaxSize().verticalScroll(rememberScrollState())
                             .padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                            Text(stringResource(R.string.home_settings_intro))
-                            // Eksisterende vannpåminnelser, uten å endre lagring eller varselkode.
+                            OutlinedButton(
+                                onClick = { destination = AppDestination.GOALS },
+                                modifier = Modifier.fillMaxWidth().testTag("settings_open_goals"),
+                            ) {
+                                Text(stringResource(R.string.goals_title))
+                            }
                             settingsContent()
                         }
                     }

@@ -4,7 +4,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.DirectionsWalk
 import androidx.compose.material.icons.rounded.BarChart
-import androidx.compose.material.icons.rounded.EmojiEvents
 import androidx.compose.material.icons.rounded.Checklist
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.LocalFireDepartment
@@ -25,7 +24,6 @@ internal object HomeIcons {
     val Steps = Icons.AutoMirrored.Rounded.DirectionsWalk
     val Sun = Icons.Rounded.WbSunny
     val Flame = Icons.Rounded.LocalFireDepartment
-    val Trophy = Icons.Rounded.EmojiEvents
     val Settings = Icons.Rounded.Settings
     // Speilvendes automatisk dersom appen senere brukes med et høyre-til-venstre-språk.
     val Back = Icons.AutoMirrored.Rounded.ArrowBack

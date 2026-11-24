@@ -2,6 +2,7 @@ package no.gruppe7.amate.feature.home.ui
 
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextEquals
@@ -14,6 +15,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import no.gruppe7.amate.core.navigation.AmateShell
+import no.gruppe7.amate.feature.water.ui.WaterUiState
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -33,14 +35,14 @@ class HomeScreenTest {
                 // Profil er nå koblet inn i skallet. Her holder det med en enkel testside.
                 profileContent = { Text("Profilside for test") },
                 stepsContent = { Text("Skrittside for test") },
-                progressContent = { openGoals, openWater, openSteps ->
+                progressContent = { openWater, openSteps ->
                     androidx.compose.foundation.layout.Column {
                         Text("Fremgangside for test")
-                        TextButton(onClick = openGoals) { Text("Mål fra fremgang") }
                         TextButton(onClick = openWater) { Text("Vann fra fremgang") }
                         TextButton(onClick = openSteps) { Text("Skritt fra fremgang") }
                     }
                 },
+                waterState = WaterUiState(streakDays = 2),
                 goalsContent = {Text ("Målside for test") },
                 tasksContent = {Text("Gjøremål for test") },
             )
@@ -48,10 +50,11 @@ class HomeScreenTest {
     }
 
     @Test
-    fun homeShowsPlaceholdersInsteadOfPretendUserData() {
-        compose.onNodeWithText("Hei, fint å se deg!").assertIsDisplayed()
-        compose.onNodeWithText("Vannkortet viser dagens registreringer. Værkortet kan bruke din posisjon. De andre kortene kommer senere.").assertIsDisplayed()
-        compose.onNodeWithTag("home_tab_home").assertIsSelected()
+    fun streakIsVisibleAtTheBottomWithoutATrophyOrClickAction() {
+        compose.onNodeWithTag("home_list").performScrollToNode(hasTestTag("home_water_streak"))
+        compose.onNodeWithTag("home_water_streak").assertIsDisplayed().assertHasNoClickAction()
+        compose.onNodeWithText("2 dager på rad").assertIsDisplayed()
+        compose.onNodeWithText("— merker").assertDoesNotExist()
     }
 
     @Test
@@ -65,14 +68,17 @@ class HomeScreenTest {
     }
 
     @Test
-    fun goalsShortcutOpensGoalsAndBackReturnHome() {
-        // Lenken ligger nederst i vannkortet, så listen må scrolles dit først.
-        compose.onNodeWithTag("home_list").performScrollToNode(hasTestTag("home_open_goals"))
-        compose.onNodeWithTag("home_open_goals").performClick()
+    fun goalsOpenFromSettingsAndBackReturnsToSettings() {
+        compose.onNodeWithTag("home_list").performScrollToNode(hasTestTag("home_open_water"))
+        compose.onNodeWithText("Endre mål").assertDoesNotExist()
+        compose.onNodeWithTag("home_list").performScrollToNode(hasTestTag("home_settings"))
+        compose.onNodeWithTag("home_settings").performClick()
+        compose.onNodeWithTag("settings_open_goals").assertTextEquals("Mine mål").performClick()
         compose.onNodeWithText("Mine mål").assertIsDisplayed()
         compose.onNodeWithText("Målside for test").assertIsDisplayed()
-        compose.onNodeWithContentDescription("Tilbake til hjem").performClick()
-        compose.onNodeWithTag("home_settings").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Tilbake til innstillinger").performClick()
+        compose.onNodeWithText("Innstillinger").assertIsDisplayed()
+        compose.onNodeWithTag("settings_open_goals").assertIsDisplayed()
     }
 
     @Test
@@ -108,10 +114,7 @@ class HomeScreenTest {
     }
 
     @Test
-    fun progressShortcutsOpenGoalsWaterAndSteps() {
-        compose.onNodeWithTag("home_tab_progress").performClick()
-        compose.onNodeWithText("Mål fra fremgang").performClick()
-        compose.onNodeWithText("Målside for test").assertIsDisplayed()
+    fun progressShortcutsOpenWaterAndSteps() {
         compose.onNodeWithTag("home_tab_progress").performClick()
         compose.onNodeWithText("Vann fra fremgang").performClick()
         compose.onNodeWithText("Vannside for test").assertIsDisplayed()

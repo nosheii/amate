@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import no.gruppe7.amate.feature.profile.data.ProfileRepository
 import no.gruppe7.amate.feature.profile.data.local.AvatarConfigEntity
 import no.gruppe7.amate.feature.profile.data.local.UserProfileEntity
+import no.gruppe7.amate.feature.profile.data.validProfileNameOrNull
 
 
 /** TODO: Koble ProfileRepository til ProfileUiState. */
@@ -48,7 +49,7 @@ class ProfileViewModel(
     }
 
     fun onNameChanged(name: String) {
-        _uiState.update { it.copy(displayName = name, saved = false) }
+        _uiState.update { it.copy(displayName = name, nameError = false, saved = false) }
     }
 
     fun onAgeChanged(age: Int?) {
@@ -60,12 +61,18 @@ class ProfileViewModel(
     }
 
     fun saveProfile() {
+        val state = _uiState.value
+        val name = validProfileNameOrNull(state.displayName)
+        if (name == null) {
+            _uiState.update { it.copy(nameError = true, saved = false) }
+            return
+        }
+
         viewModelScope.launch {
-            val state = _uiState.value
             profileRepository.saveProfile(
                 UserProfileEntity(
                     userId = state.userId,
-                    displayName = state.displayName,
+                    displayName = name,
                     age = state.age
                 )
             )

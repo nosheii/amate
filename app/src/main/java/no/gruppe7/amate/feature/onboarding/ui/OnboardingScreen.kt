@@ -126,7 +126,7 @@ fun OnboardingScreen(
                                         label = { Text(stringResource(R.string.profile_name)) }, isError = state.nameError,
                                         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Done),
                                         modifier = Modifier.fillMaxWidth().testTag("onboarding_name"))
-                                    if (state.nameError) ErrorText(R.string.onboarding_name_error, "onboarding_name_error")
+                                    if (state.nameError) ErrorText(R.string.profile_name_error, "onboarding_name_error")
                                 }
                             }
                             item {

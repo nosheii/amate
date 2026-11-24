@@ -123,15 +123,19 @@
     <string name="home_encouragement">Små steg teller.\nDu gjør det bedre enn du tror.</string>
     <string name="home_greeting">Hei, fint å se deg!</string>
     <string name="home_preview_note">Vannkortet viser dagens registreringer. Værkortet kan bruke din posisjon. De andre kortene kommer senere.</string>
-    <string name="home_coming_later">Kommer senere</string>
     <string name="home_today">Dagens små mål</string>
     <string name="home_steps">— skritt</string>
     <string name="home_not_connected">Ikke koblet til ennå</string>
     <string name="home_water">— ml vann</string>
     <string name="home_water_hint">Åpne vannskjermen for dagens faktiske mengde.</string>
     <string name="home_register_water">Registrer vann</string>
-    <string name="home_streak">— dager på rad</string>
-    <string name="home_achievements">— merker</string>
+    <string name="home_water_streak">Vannstreak</string>
+    <string name="home_water_streak_loading">Henter …</string>
+    <string name="home_water_streak_unavailable">Ikke tilgjengelig</string>
+    <plurals name="home_water_streak_days">
+        <item quantity="one">%1$s dag på rad</item>
+        <item quantity="other">%1$s dager på rad</item>
+    </plurals>
     <string name="home_nav_home">Hjem</string>
     <string name="home_nav_progress">Fremgang</string>
     <string name="home_nav_profile">Profil</string>
@@ -139,10 +143,8 @@
     <string name="home_back">Tilbake til hjem</string>
     <string name="home_water_title">Vannregistrering</string>
     <string name="home_settings_title">Innstillinger</string>
-    <string name="home_settings_intro">Her finner du vannpåminnelsene. Flere innstillinger kan legges til senere.</string>
+    <string name="settings_back">Tilbake til innstillinger</string>
     <string name="home_placeholder_body">Her kommer det mer etter hvert. Foreløpig er dette bare et skall, uten personlige data.</string>
-    <string name="home_goals_title">Mine mål</string>
-    <string name="home_open_goals">Endre mål</string>
     <string name="home_open_tasks">Gjøremål</string>
 
     <!-- Skritteller -->
@@ -161,7 +163,6 @@
     <string name="steps_add_1000">+1 000 skritt</string>
     <string name="steps_history_title">Tidligere dager</string>
     <string name="steps_history_empty">Ingen tidligere skrittdata registrert ennå.</string>
-    <string name="steps_edit_goal">Endre mål</string>
     <string name="steps_register_steps">Registrer skritt</string>
 
     <!-- Skrittpåminnelser -->

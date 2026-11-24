@@ -5,7 +5,6 @@
     <string name="onboarding_step">Steg %1$d av 3</string>
     <string name="onboarding_welcome">Velkommen til AMATE!</string>
     <string name="onboarding_welcome_body">Hva skal vi kalle deg? Velg også en liten venn. Profilen lagres bare på denne enheten – du trenger ikke passord.</string>
-    <string name="onboarding_name_error">Skriv et navn på 1–40 tegn.</string>
     <string name="onboarding_avatar_error">Velg en avatar før du fortsetter.</string>
     <string name="onboarding_goals_title">Dine daglige mål</string>
     <string name="onboarding_goals_body">Hva ønsker du å sikte mot? Begge feltene er valgfrie. Du kan sette og endre mål senere. Hopper du over, beholder vi eventuelle mål du allerede har.</string>

@@ -27,7 +27,6 @@ import androidx.compose.material.icons.automirrored.rounded.DirectionsRun
 import androidx.compose.material.icons.automirrored.rounded.DirectionsWalk
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material.icons.rounded.Flag
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.Button
@@ -39,7 +38,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -77,7 +75,6 @@ private val SoftGreen = Color(0xFFE4EBCB)
 fun StepsRoute(
     stepsRepository: StepsRepository,
     goalRepository: GoalRepository? = null,
-    onOpenGoals: () -> Unit = {},
     onTestNotification: (() -> Boolean)? = null,
 ) {
     val viewModel = rememberStepsViewModel(stepsRepository, goalRepository)
@@ -87,7 +84,6 @@ fun StepsRoute(
         uiState = uiState,
         onPermissionResult = viewModel::onPermissionResult,
         onAddStep = viewModel::addStep,
-        onOpenGoals = onOpenGoals,
         onTestNotification = onTestNotification,
     )
 }
@@ -97,7 +93,6 @@ fun StepsScreen(
     uiState: StepsUiState,
     onPermissionResult: (Boolean) -> Unit = {},
     onAddStep: (Int) -> Unit = {},
-    onOpenGoals: () -> Unit = {},
     onTestNotification: (() -> Boolean)? = null,
 ) {
     val context = LocalContext.current
@@ -226,29 +221,11 @@ fun StepsScreen(
                                 )
                             }
                         } else {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.steps_no_goal),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                                TextButton(
-                                    onClick = onOpenGoals,
-                                    modifier = Modifier.testTag("steps_open_goals"),
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Flag,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(18.dp),
-                                    )
-                                    Spacer(Modifier.size(4.dp))
-                                    Text(stringResource(R.string.steps_edit_goal))
-                                }
-                            }
+                            Text(
+                                text = stringResource(R.string.steps_no_goal),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
                         }
                     }
                 }

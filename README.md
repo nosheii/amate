@@ -1,41 +1,49 @@
 # Amate
 
-Amate er en selvomsorgsapp som hjelper brukere med å bygge gode hverdagsrutiner uten prestasjonspress. Appen er laget for alle som mangler automatiserte selvomsorgsvaner i dagliglivet, enten det skyldes funksjonsnedsettelser, sykdom eller en ny livssituasjon.
-
-## Hva appen gjør
-
-Mange eksisterende selvomsorgs-apper er laget for en "gjennomsnittsbruker" og har et prestasjonsorientert, tallfokusert design med streaks, poeng og statistikk, som ofte oppleves skambasert eller dømmende. Amate tar en annen tilnærming: brukeren velger selv en avatar, lager sin egen liste med gjøremål, og mottar oppmuntrende feedback gjennom dagen. Streaks brukes kun for å holde motivasjonen oppe, og det finnes ingen straff for å miste en streak.
+Amate er en Android-app som hjelper brukere med å bygge gode selvomsorgsrutiner uten prestasjonspress. Appen er laget for personer som trenger støtte til å etablere hverdagsvaner, for eksempel ved sykdom, funksjonsnedsettelse eller en ny livssituasjon.
 
 ## Funksjoner
 
-- **Varsler** – Påminnelser om vann og egendefinerte gjøremål, med brukervalgt frekvens (1–5 om dagen) og "stille timer" (f.eks. ikke 22–07)
-- **Stegsensor** – Skritteller med dagsmål
-- **Lokasjonstjenester** – Brukes til vær og pollen, som styrer bakgrunn, avatarens tilbehør (paraply, solbriller) og anbefalinger som "gå tur i dag"
-- **Eksterne API-er** – Værdata fra Yr/MET og pollenvarsel fra Google Pollen API
-- **Lokal database (Room)** – Lagrer bruker, mål, prestasjoner og egne gjøremål på enheten. Brukerdata lagres kun lokalt; bare posisjon sendes til vær- og pollentjenestene
-- **Navigation** – Navigasjon mellom skjermer med Navigation Compose
-- **Tilpasset UI** – Egen avatar (tegnet i Procreate), bakgrunn som skifter med tid på døgnet og vær, og støtte for portrett og landskap
+- **Profil og avatar.** Velg navn og en av fem håndtegnede avatarer ved første oppstart. Valgt avatar vises på hjemskjermen og kan endres i profilen.
+- **Vann.** Registrer vann med hurtigvalg eller eget volum. Vannstreaken på hjemskjermen teller sammenhengende dager med minst én vannregistrering.
+- **Skritt.** Registrer skritt manuelt eller bruk telefonens skrittsensor når den er tilgjengelig og appen har tillatelse.
+- **Mål og fremgang.** Sett dagsmål for vann og skritt under **Innstillinger → Mine mål**, og se utviklingen de siste sju dagene på fremgangssiden.
+- **Gjøremål.** Opprett og rediger egne gjøremål, og kryss av når de er fullført.
+- **Påminnelser.** Velg mellom én og fem daglige påminnelser for vann og skritt, innenfor et tidsrom du velger.
+- **Vær.** Se varsel fra MET Norway. Bruk omtrentlig posisjon med tillatelse, søk etter et sted selv, eller bruk Oslo som standardsted. [Slik fungerer værkortet](WEATHER.md).
+
+## Lagring og personvern
+
+Profil, avatar, mål, registreringer, gjøremål og påminnelsesinnstillinger lagres på enheten. Appen har ingen innlogging eller egen server. Android kan ta med appdata i sikkerhetskopien hvis sikkerhetskopiering er aktivert. Ved værhenting mottar MET koordinatene til stedet som vises. Ved manuelt stedsøk mottar Open-Meteo søketeksten. [Mer om hva værtjenestene mottar](WEATHER.md#kilde-og-personvern).
 
 ## Teknologi
 
 - Kotlin
-- Jetpack Compose / Material Design
+- Jetpack Compose og Material 3
 - Room (lokal database)
-- Navigation Compose
+- WorkManager (bakgrunnsjobber for påminnelser)
 
 ## Kom i gang
 
-1. Klon repoet
-2. Åpne prosjektet i Android Studio
-3. Bygg og kjør appen på emulator eller fysisk Android-enhet
+1. Klon repoet og åpne prosjektmappen i Android Studio.
+2. Installer Android SDK 37 via SDK Manager. Bruk JDK-en som følger med Android Studio som Gradle JDK. Prosjektet er bygget med JDK 25.
+3. Kjør `app` på en emulator eller en fysisk enhet med Android 8.0 (API 26) eller nyere. Vær og stedsøk krever nett, og de bruker ingen API-nøkkel.
+
+Kjør bygg, enhetstester og lint fra prosjektmappen.
+
+```sh
+./gradlew assembleDebug testDebugUnitTest lintDebug
+```
+
+Debug-APK-en ligger i `app/build/outputs/apk/debug/app-debug.apk`. Kjør `./gradlew connectedDebugAndroidTest` med en emulator eller Android-enhet koblet til for å kjøre instrumenterte tester.
 
 ## Gruppe
 
 Prosjektet er laget av gruppe 7 i MOB3000 (Applikasjonsutvikling for mobile enheter). Hvert medlem bygger sin egen "vertikale funksjon" (Compose-skjerm → ViewModel/UiState → Repository → DAO → Room-tabell):
 
-- Nora Al-Tay – prosjektleder, vannregistrering og påminnelser (pilotfunksjon), avatarer tegnet i Procreate, integrasjon mot vær-/pollen-API
+- Nora Al-Tay – prosjektleder, vannregistrering og påminnelser (pilotfunksjon), avatarer tegnet i Procreate og integrasjon mot vær-API
 - Ana María Araya Flores – profil og avatar-valg
 - Najma Abdi – mål og egendefinerte gjøremål, koordinerer databaseklassen og navigasjonen
 - Felix Torp-Nilsen – skritt og sensor
 
-Se `PROJECT_STRUCTURE.md` for git-arbeidsflyten vi bruker i prosjektet.
+Se [prosjektstruktur og Git-arbeidsflyt](PROJECT_STRUCTURE.md).

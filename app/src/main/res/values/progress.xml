@@ -4,7 +4,6 @@
     <string name="progress_steps_shortcut">Skritteller</string>
     <string name="progress_goal_reference">Dagens mål: %1$s</string>
     <string name="progress_chart_note">Stiplet linje = dagens mål som referanse, ikke tidligere mål. Vann og skritt har hver sin skala. Snittet inkluderer alle sju dagene.</string>
-    <string name="progress_goals_shortcut">Mål</string>
     <string name="progress_tab_water">Vann</string>
     <string name="progress_tab_steps">Skritt</string>
     <string name="progress_steps_amount">%1$s skritt</string>

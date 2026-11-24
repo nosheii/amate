@@ -7,10 +7,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextReplacement
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.room.Room
@@ -20,6 +23,7 @@ import java.util.UUID
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import no.gruppe7.amate.R
 import no.gruppe7.amate.core.database.AmateDatabase
 import no.gruppe7.amate.core.navigation.AmateShell
 import no.gruppe7.amate.feature.goals.data.RoomGoalRepository
@@ -31,6 +35,7 @@ import no.gruppe7.amate.feature.profile.ui.ProfileRoute
 import no.gruppe7.amate.feature.profile.ui.ProfileViewModel
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -43,6 +48,7 @@ class HomeAvatarIntegrationTest {
     private val databaseName = "avatar-test-${UUID.randomUUID()}"
     private lateinit var database: AmateDatabase
     private lateinit var profiles: RoomProfileRepository
+    private lateinit var onboarding: RoomOnboardingRepository
 
     @Before fun setUp() {
         database = Room.databaseBuilder(context, AmateDatabase::class.java, databaseName).build()
@@ -53,10 +59,8 @@ class HomeAvatarIntegrationTest {
             override suspend fun setCompleted(userId: Long, completed: Boolean) { this.completed.value = completed }
         }
         // Samme lagringsvei som når brukeren fullfører førstegangsoppsettet.
-        runBlocking {
-            RoomOnboardingRepository(database, profiles, RoomGoalRepository(database.goalDao()), completion)
-                .complete(1L, OnboardingDraft("Testbruker", "kanin"))
-        }
+        onboarding = RoomOnboardingRepository(database, profiles, RoomGoalRepository(database.goalDao()), completion)
+        runBlocking { onboarding.complete(1L, OnboardingDraft("Testbruker", "kanin")) }
         compose.setContent {
             val avatar by remember { profiles.observeAvatar(1L) }.collectAsStateWithLifecycle(initialValue = null)
             AmateShell(
@@ -112,5 +116,34 @@ class HomeAvatarIntegrationTest {
         compose.onNodeWithTag("home_tab_home").performClick()
         expectAvatar("Kanin")
         runBlocking { assertEquals("kanin", profiles.observeAvatar(1L).first()?.avatarKey) }
+    }
+
+    @Test fun invalidProfileNameKeepsOnboardingCompleteAndCanBeCorrected() {
+        expectAvatar("Kanin")
+        compose.onNodeWithTag("home_tab_profile").performClick()
+        val name = compose.onNodeWithTag("profile_name")
+        compose.waitUntil(5_000) { runCatching { name.assertTextContains("Testbruker") }.isSuccess }
+        val save = compose.onNodeWithTag("profile_save")
+        val errorText = context.getString(R.string.profile_name_error)
+
+        for (invalidName in listOf("   ", "a".repeat(41))) {
+            name.performScrollTo().performTextReplacement(invalidName)
+            save.performScrollTo().performClick()
+            compose.onNodeWithText(errorText).assertIsDisplayed()
+            runBlocking {
+                assertEquals("Testbruker", profiles.observeProfile(1L).first()?.displayName)
+                assertTrue(onboarding.observeStatus(1L).first().completed)
+            }
+        }
+
+        name.performScrollTo().performTextReplacement("  Nytt navn  ")
+        save.performScrollTo().performClick()
+        val savedLabel = context.getString(R.string.profile_saved)
+        compose.waitUntil(5_000) { runCatching { save.assertTextContains(savedLabel) }.isSuccess }
+        compose.onNodeWithText(errorText).assertDoesNotExist()
+        runBlocking {
+            assertEquals("Nytt navn", profiles.observeProfile(1L).first()?.displayName)
+            assertTrue(onboarding.observeStatus(1L).first().completed)
+        }
     }
 }

@@ -15,11 +15,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.gruppe7.amate.feature.goals.data.local.GoalType
 import no.gruppe7.amate.feature.goals.data.local.validRange
-import no.gruppe7.amate.feature.onboarding.data.ONBOARDING_NAME_MAX_LENGTH
 import no.gruppe7.amate.feature.onboarding.data.OnboardingDraft
 import no.gruppe7.amate.feature.onboarding.data.OnboardingRepository
 import no.gruppe7.amate.feature.onboarding.data.OnboardingStatus
 import no.gruppe7.amate.feature.profile.data.AvatarKeys
+import no.gruppe7.amate.feature.profile.data.validProfileNameOrNull
 
 enum class OnboardingEntry { LOADING, SETUP, READY, ERROR }
 enum class OnboardingStep { PROFILE, GOALS, PERMISSIONS }
@@ -119,7 +119,7 @@ class OnboardingViewModel(
 
     private fun validateProfile(): Boolean {
         val state = _uiState.value
-        val nameError = state.name.trim().isBlank() || state.name.trim().length > ONBOARDING_NAME_MAX_LENGTH
+        val nameError = validProfileNameOrNull(state.name) == null
         val avatarError = state.avatarKey !in AvatarKeys.all
         _uiState.update { it.copy(nameError = nameError, avatarError = avatarError) }
         return !nameError && !avatarError

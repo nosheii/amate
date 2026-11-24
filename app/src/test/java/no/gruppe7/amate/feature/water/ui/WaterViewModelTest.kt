@@ -78,6 +78,51 @@ class WaterViewModelTest {
     }
 
     @Test
+    fun waterStreak_countsEachLocalDayOnceAndUpdatesWhenWaterIsAddedOrDeleted() = waterTest {
+        fun entry(id: Long, timestamp: String, userId: Long = 1, amount: Int = 1) =
+            WaterEntryEntity(id, userId, amount, Instant.parse(timestamp).toEpochMilli())
+
+        repository.entries.value = listOf(
+            entry(10, "2026-10-13T22:30:00Z"), // 14. oktober i Oslo.
+            entry(11, "2026-10-14T10:00:00Z"),
+            entry(12, "2026-10-12T22:30:00Z"), // 13. oktober i Oslo.
+            entry(13, "2026-10-10T10:00:00Z"), // En eldre rekke bak et opphold.
+            entry(14, "2026-10-15T10:00:00Z", userId = 2),
+            entry(15, "2026-10-15T10:00:00Z", amount = 0),
+            entry(16, "2026-10-16T10:00:00Z"),
+        )
+        val model = model()
+        runCurrent()
+        assertEquals(2, model.uiState.value.streakDays)
+
+        model.addQuick(1)
+        runCurrent()
+        assertEquals(3, model.uiState.value.streakDays)
+
+        val today = model.uiState.value.entries.single { it.amountMl > 0 }
+        model.askToDelete(today)
+        model.confirmDelete()
+        runCurrent()
+        assertEquals(2, model.uiState.value.streakDays)
+    }
+
+    @Test
+    fun waterStreak_resetsAtMidnightAfterAnEntireDayWithoutWater() = waterTest {
+        clock.now = Instant.parse("2026-10-15T21:59:50Z")
+        repository.entries.value = listOf(
+            WaterEntryEntity(1, 1, 1, Instant.parse("2026-10-14T12:00:00Z").toEpochMilli()),
+        )
+        val model = model()
+        runCurrent()
+        assertEquals(1, model.uiState.value.streakDays)
+
+        clock.now = clock.now.plusSeconds(30)
+        advanceTimeBy(30_000)
+        runCurrent()
+        assertEquals(0, model.uiState.value.streakDays)
+    }
+
+    @Test
     fun editor_rejectsEmptyNegativeDecimalZeroAndOverflow() = waterTest {
         val model = model()
         runCurrent()

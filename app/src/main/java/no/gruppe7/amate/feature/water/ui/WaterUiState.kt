@@ -23,6 +23,8 @@ data class WaterUiState(
     val goalMl: Int? = null,
     val isGoalLoading: Boolean = true,
     val goalLoadFailed: Boolean = false,
+    val streakDays: Int? = null,
+    val streakLoadFailed: Boolean = false,
 ) {
     // Listen og summen følger samme utsending fra Room.
     val totalTodayMl: Long get() = entries.sumOf { it.amountMl.toLong() }
