@@ -88,7 +88,6 @@ class MainActivity : ComponentActivity() {
                             StepsRoute(
                                 container.stepsRepository,
                                 container.goalRepository,
-                                onOpenGoals = { navigationRequest = AppDestination.GOALS },
                                 onTestNotification = { container.stepReminderNotifications.showTestNotification(stepsState.stepsToday) },
                             )
                         },
@@ -107,8 +106,8 @@ class MainActivity : ComponentActivity() {
                         weatherContent = { WeatherRoute(container.weatherRepository, container.weatherLocation) },
                         goalsContent = { GoalsRoute(container.goalRepository) },
                         // Fremgang bruker de eksisterende kildene til vann, skritt og mål, ikke en egen database.
-                        progressContent = { openGoals, openWater, openSteps ->
-                            ProgressRoute(container.waterRepository, container.goalRepository, openGoals, openWater,
+                        progressContent = { openWater, openSteps ->
+                            ProgressRoute(container.waterRepository, container.goalRepository, openWater,
                                 stepsRepository = container.stepsRepository, onOpenSteps = openSteps)
                         },
                         tasksContent = { TasksRoute(container.taskRepository, model = tasksModel) },

@@ -48,7 +48,6 @@ import no.gruppe7.amate.feature.water.data.WaterRepository
 fun ProgressRoute(
     waterRepository: WaterRepository,
     goalRepository: GoalRepository,
-    onOpenGoals: () -> Unit,
     onOpenWater: () -> Unit,
     stepsRepository: StepsRepository? = null,
     onOpenSteps: () -> Unit = {},
@@ -59,14 +58,13 @@ fun ProgressRoute(
     val model: ProgressViewModel = viewModel(factory = factory)
     val state by model.uiState.collectAsStateWithLifecycle()
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { model.refreshDay() }
-    ProgressScreen(state, model::retry, onOpenGoals, onOpenWater, onOpenSteps = onOpenSteps)
+    ProgressScreen(state, model::retry, onOpenWater, onOpenSteps = onOpenSteps)
 }
 
 @Composable
 fun ProgressScreen(
     state: ProgressUiState,
     onRetry: () -> Unit,
-    onOpenGoals: () -> Unit,
     onOpenWater: () -> Unit,
     modifier: Modifier = Modifier,
     onOpenSteps: () -> Unit = {},
@@ -81,13 +79,8 @@ fun ProgressScreen(
         ) {
             item {
                 ProgressCard {
-                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        Text(stringResource(R.string.progress_today, state.date.format(dateFormat)),
-                            fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                        TextButton(onClick = onOpenGoals, modifier = Modifier.testTag("progress_open_goals")) {
-                            Text(stringResource(R.string.progress_goals_shortcut))
-                        }
-                    }
+                    Text(stringResource(R.string.progress_today, state.date.format(dateFormat)),
+                        fontWeight = FontWeight.Bold)
                     // Begge vises samtidig. Smal skjerm eller stor tekst? Da legger vi dem under hverandre.
                     BoxWithConstraints {
                         val stack = maxWidth < 300.dp || LocalDensity.current.fontScale > 1.3f

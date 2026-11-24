@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import java.time.Clock
+import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import kotlinx.coroutines.CancellationException
@@ -22,6 +23,7 @@ import kotlinx.coroutines.launch
 import no.gruppe7.amate.R
 import no.gruppe7.amate.feature.goals.data.GoalRepository
 import no.gruppe7.amate.feature.goals.data.local.GoalType
+import no.gruppe7.amate.feature.progress.domain.waterStreakDays
 import no.gruppe7.amate.feature.water.data.MAX_ENTRY_ML
 import no.gruppe7.amate.feature.water.data.WaterRepository
 import no.gruppe7.amate.feature.water.data.local.WaterEntryEntity
@@ -102,6 +104,25 @@ class WaterViewModel(
                         isGoalLoading = false, goalLoadFailed = false,
                     )
                 }
+            }
+        }
+
+        viewModelScope.launch {
+            reload.flatMapLatest {
+                combine(repository.observeEntries(userId), day) { entries, current ->
+                    val daysWithWater = entries.asSequence()
+                        .filter { it.amountMl > 0 }
+                        .map { Instant.ofEpochMilli(it.loggedAtMillis).atZone(current.zone).toLocalDate() }
+                        .toSet()
+                    waterStreakDays(daysWithWater, current.date)
+                }
+                    .onStart { _uiState.update { it.copy(streakDays = null, streakLoadFailed = false) } }
+                    .catch { error ->
+                        if (error is CancellationException) throw error
+                        _uiState.update { it.copy(streakDays = null, streakLoadFailed = true) }
+                    }
+            }.collectLatest { count ->
+                _uiState.update { it.copy(streakDays = count, streakLoadFailed = false) }
             }
         }
 

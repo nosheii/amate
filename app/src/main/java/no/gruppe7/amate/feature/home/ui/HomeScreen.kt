@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -90,7 +91,6 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     onOpenWater: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
-    onOpenGoals: () -> Unit = {},
     onOpenSteps: () -> Unit = {},
     onOpenTasks: () -> Unit = {},
     waterState: WaterUiState = WaterUiState(),
@@ -271,20 +271,13 @@ fun HomeScreen(
                         shape = RoundedCornerShape(16.dp), contentPadding = PaddingValues(14.dp)) {
                         Text(stringResource(R.string.home_register_water))
                     }
-                    TextButton(onClick = onOpenGoals, modifier = Modifier.fillMaxWidth().testTag("home_open_goals")) {
-                        Text(stringResource(R.string.home_open_goals))
-                    }
                 }
             }
             item {
                 HomeTasksCard(tasksState, onOpenTasks, onAddTask, onRetryTasks)
             }
             item {
-                // De små kortene speiler mockupen. Ingen streak eller merker beregnes ennå.
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    SummaryCard(HomeIcons.Flame, R.string.home_streak, Color(0xFFB96523), Modifier.weight(1f))
-                    SummaryCard(HomeIcons.Trophy, R.string.home_achievements, Color(0xFFAA7C20), Modifier.weight(1f))
-                }
+                HomeWaterStreakCard(waterState, numbers)
             }
         }
     }
@@ -350,11 +343,24 @@ private fun IconTile(icon: ImageVector, background: Color, tint: Color) {
 }
 
 @Composable
-private fun SummaryCard(icon: ImageVector, title: Int, tint: Color, modifier: Modifier) {
-    HomeCard(modifier) {
-        Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(28.dp))
-        Text(stringResource(title), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
-        Text(stringResource(R.string.home_coming_later), style = MaterialTheme.typography.bodySmall)
+private fun HomeWaterStreakCard(state: WaterUiState, numbers: NumberFormat) {
+    val streak = state.streakDays
+    val title = when {
+        streak != null -> pluralStringResource(R.plurals.home_water_streak_days, streak, numbers.format(streak))
+        state.streakLoadFailed -> stringResource(R.string.home_water_streak_unavailable)
+        else -> stringResource(R.string.home_water_streak_loading)
+    }
+    HomeCard(Modifier.testTag("home_water_streak")) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            IconTile(HomeIcons.Flame, Color(0xFFF8E5D1), Color(0xFFB96523))
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(title, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.home_water_streak), style = MaterialTheme.typography.bodySmall)
+            }
+        }
     }
 }
 

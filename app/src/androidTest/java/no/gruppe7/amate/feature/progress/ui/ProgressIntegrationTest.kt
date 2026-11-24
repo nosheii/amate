@@ -55,7 +55,7 @@ class ProgressIntegrationTest {
         steps.incrementStep(2, 900, today)
         goals.saveGoal(1, GoalType.WATER, 3000)
         goals.saveGoal(1, GoalType.STEPS, 1000)
-        compose.setContent { HomeShellTheme { ProgressRoute(water, goals, {}, {}, stepsRepository = steps) } }
+        compose.setContent { HomeShellTheme { ProgressRoute(water, goals, {}, stepsRepository = steps) } }
         waitForText("progress_steps_today_total", "500 skritt")
         waitForText("progress_steps_percent", "50 % av dagens mål")
         goals.saveGoal(1, GoalType.STEPS, 2000)
@@ -87,7 +87,7 @@ class ProgressIntegrationTest {
         // En annen brukers registrering skal ikke telle i denne fremgangen.
         water.addWater(2, 900, timeToday)
         goals.saveGoal(1, GoalType.WATER, 2000)
-        compose.setContent { HomeShellTheme { ProgressRoute(water, goals, {}, {}) } }
+        compose.setContent { HomeShellTheme { ProgressRoute(water, goals, {}) } }
         waitForText("progress_today_total", "500 ml")
         waitForText("progress_today_percent", "25 % av dagens mål")
 

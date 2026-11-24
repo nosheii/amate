@@ -30,7 +30,7 @@ class ProgressScreenTest {
     )
 
     @Test fun showsTodayPercentageAndWeekFromTheSameData() {
-        compose.setContent { HomeShellTheme { ProgressScreen(state(), {}, {}, {}) } }
+        compose.setContent { HomeShellTheme { ProgressScreen(state(), {}, {}) } }
         compose.onNodeWithTag("progress_today_total").assertTextEquals("500 ml")
         compose.onNodeWithTag("progress_today_percent").assertTextEquals("25 % av dagens mål")
         compose.onNodeWithTag("progress_list").performScrollToNode(hasTestTag("progress_week_total"))
@@ -39,25 +39,23 @@ class ProgressScreenTest {
         compose.onNodeWithTag("progress_week_average").assertTextEquals("Gjennomsnitt: 71 ml per dag")
     }
 
-    @Test fun noGoalStillShowsWaterAndBothShortcutsWork() {
-        var openedGoals = 0
+    @Test fun noGoalStillShowsWaterAndRegistrationShortcut() {
         var openedWater = 0
         compose.setContent {
-            HomeShellTheme { ProgressScreen(state(goal = null), {}, { openedGoals++ }, { openedWater++ }) }
+            HomeShellTheme { ProgressScreen(state(goal = null), {}, { openedWater++ }) }
         }
         compose.onNodeWithTag("progress_today_total").assertTextEquals("500 ml")
         compose.onNodeWithTag("progress_missing_goal").assertIsDisplayed()
         compose.onNodeWithTag("progress_today_meter").assertDoesNotExist()
-        compose.onNodeWithTag("progress_list").performScrollToNode(hasTestTag("progress_open_goals"))
-        compose.onNodeWithTag("progress_open_goals").performClick()
+        compose.onNodeWithTag("progress_open_goals").assertDoesNotExist()
         compose.onNodeWithTag("progress_open_water").performClick()
-        compose.runOnIdle { assertEquals(1, openedGoals); assertEquals(1, openedWater) }
+        compose.runOnIdle { assertEquals(1, openedWater) }
     }
 
     @Test fun waterFailureDoesNotDrawAFalseEmptyWeek() {
         var retries = 0
         compose.setContent {
-            HomeShellTheme { ProgressScreen(state().copy(waterLoadFailed = true), { retries++ }, {}, {}) }
+            HomeShellTheme { ProgressScreen(state().copy(waterLoadFailed = true), { retries++ }, {}) }
         }
         compose.onNodeWithTag("progress_today_total").assertDoesNotExist()
         compose.onNodeWithTag("progress_today_percent").assertDoesNotExist()
@@ -69,7 +67,7 @@ class ProgressScreenTest {
 
     @Test fun goalFailureIsNotPresentedAsMissingGoal() {
         compose.setContent {
-            HomeShellTheme { ProgressScreen(state(goal = null).copy(goalLoadFailed = true), {}, {}, {}) }
+            HomeShellTheme { ProgressScreen(state(goal = null).copy(goalLoadFailed = true), {}, {}) }
         }
         compose.onNodeWithTag("progress_goal_retry").assertIsDisplayed()
         compose.onNodeWithTag("progress_missing_goal").assertDoesNotExist()
@@ -78,7 +76,7 @@ class ProgressScreenTest {
     }
 
     @Test fun emptyWeekHasAnExplanationRatherThanSampleData() {
-        compose.setContent { HomeShellTheme { ProgressScreen(state(amount = 0, goal = null), {}, {}, {}) } }
+        compose.setContent { HomeShellTheme { ProgressScreen(state(amount = 0, goal = null), {}, {}) } }
         compose.onNodeWithTag("progress_list").performScrollToNode(hasTestTag("progress_empty"))
         compose.onNodeWithTag("progress_empty").assertIsDisplayed()
         compose.onNodeWithTag("progress_week_total").assertTextEquals("Totalt: 0 ml")
@@ -90,7 +88,7 @@ class ProgressScreenTest {
     )
 
     @Test fun waterAndStepsAreVisibleTogetherWithoutSwitchingTabs() {
-        compose.setContent { HomeShellTheme { ProgressScreen(state().copy(steps = stepsState()), {}, {}, {}) } }
+        compose.setContent { HomeShellTheme { ProgressScreen(state().copy(steps = stepsState()), {}, {}) } }
         compose.onNodeWithTag("progress_today_total").assertTextEquals("500 ml")
         compose.onNodeWithTag("progress_steps_today_total").assertTextEquals("500 skritt")
         compose.onNodeWithTag("progress_steps_percent").assertTextEquals("50 % av dagens mål")
@@ -103,7 +101,7 @@ class ProgressScreenTest {
     }
 
     @Test fun stepsErrorIsNotZeroAndDoesNotHideWater() {
-        compose.setContent { HomeShellTheme { ProgressScreen(state().copy(steps = stepsState().copy(loadFailed = true)), {}, {}, {}) } }
+        compose.setContent { HomeShellTheme { ProgressScreen(state().copy(steps = stepsState().copy(loadFailed = true)), {}, {}) } }
         compose.onNodeWithTag("progress_steps_retry").assertIsDisplayed()
         compose.onNodeWithTag("progress_steps_today_total").assertDoesNotExist()
         compose.onNodeWithTag("progress_steps_history").assertDoesNotExist()
@@ -111,38 +109,37 @@ class ProgressScreenTest {
     }
 
     @Test fun stepsGoalErrorIsDifferentFromMissingGoal() {
-        compose.setContent { HomeShellTheme { ProgressScreen(state().copy(steps = stepsState().copy(goal = null, goalLoadFailed = true)), {}, {}, {}) } }
+        compose.setContent { HomeShellTheme { ProgressScreen(state().copy(steps = stepsState().copy(goal = null, goalLoadFailed = true)), {}, {}) } }
         compose.onNodeWithTag("progress_steps_goal_retry").assertIsDisplayed()
         compose.onNodeWithTag("progress_steps_missing_goal").assertDoesNotExist()
         compose.onNodeWithTag("progress_steps_percent").assertDoesNotExist()
         compose.onNodeWithTag("progress_steps_today_total").assertTextEquals("500 skritt")
     }
 
-    @Test fun stepsWithoutGoalStillHaveBothShortcutsAndHistory() {
+    @Test fun stepsWithoutGoalStillHaveShortcutAndHistory() {
         var openedSteps = 0
-        var openedGoals = 0
         compose.setContent { HomeShellTheme {
-            ProgressScreen(state().copy(steps = stepsState().copy(goal = null)), {}, { openedGoals++ }, {},
+            ProgressScreen(state().copy(steps = stepsState().copy(goal = null)), {}, {},
                 onOpenSteps = { openedSteps++ })
         } }
         compose.onNodeWithTag("progress_steps_missing_goal").assertIsDisplayed()
         compose.onNodeWithTag("progress_list").performScrollToNode(hasTestTag("progress_open_steps"))
         compose.onNodeWithTag("progress_open_steps").performClick()
-        compose.onNodeWithTag("progress_open_goals").performClick()
-        compose.runOnIdle { assertEquals(1, openedSteps); assertEquals(1, openedGoals) }
+        compose.onNodeWithTag("progress_open_goals").assertDoesNotExist()
+        compose.runOnIdle { assertEquals(1, openedSteps) }
         compose.onNodeWithTag("progress_list").performScrollToNode(hasTestTag("progress_steps_week_total"))
         compose.onNodeWithTag("progress_steps_week_total").assertTextEquals("Totalt: 500 skritt")
     }
 
     @Test fun overGoalShowsActualPercentageWithoutChangingHistoryMeaning() {
-        compose.setContent { HomeShellTheme { ProgressScreen(state(amount = 2500), {}, {}, {}) } }
+        compose.setContent { HomeShellTheme { ProgressScreen(state(amount = 2500), {}, {}) } }
         compose.onNodeWithTag("progress_today_percent").assertTextEquals("125 % av dagens mål")
         compose.onNodeWithText("Dagens mål er nådd.").assertIsDisplayed()
     }
 
     @Test fun dashedLinesShowEachCurrentGoalAndUpdateWhenGoalChanges() {
         val current = mutableStateOf(state().copy(steps = stepsState()))
-        compose.setContent { HomeShellTheme { ProgressScreen(current.value, {}, {}, {}) } }
+        compose.setContent { HomeShellTheme { ProgressScreen(current.value, {}, {}) } }
         compose.onNodeWithTag("progress_list").performScrollToNode(hasTestTag("progress_steps_goal_line"))
         val numbers = java.text.NumberFormat.getIntegerInstance(java.util.Locale.forLanguageTag("nb-NO"))
         compose.onNodeWithTag("progress_water_goal_line")
@@ -160,7 +157,7 @@ class ProgressScreenTest {
     @Test fun staleGoalsDoNotDrawLinesWhileLoadingOrAfterFailure() {
         compose.setContent { HomeShellTheme {
             ProgressScreen(state().copy(isGoalLoading = true,
-                steps = stepsState().copy(goalLoadFailed = true)), {}, {}, {})
+                steps = stepsState().copy(goalLoadFailed = true)), {}, {})
         } }
         compose.onNodeWithTag("progress_list").performScrollToNode(hasTestTag("progress_steps_history"))
         compose.onNodeWithTag("progress_history").assertExists()
@@ -170,7 +167,7 @@ class ProgressScreenTest {
     }
 
     @Test fun emptyWeekStillShowsTheGoalReferenceWhenGoalExists() {
-        compose.setContent { HomeShellTheme { ProgressScreen(state(amount = 0), {}, {}, {}) } }
+        compose.setContent { HomeShellTheme { ProgressScreen(state(amount = 0), {}, {}) } }
         compose.onNodeWithTag("progress_list").performScrollToNode(hasTestTag("progress_water_goal_line"))
         compose.onNodeWithTag("progress_water_goal_line").assertIsDisplayed()
         compose.onNodeWithTag("progress_week_total").assertTextEquals("Totalt: 0 ml")
