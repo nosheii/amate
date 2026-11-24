@@ -48,15 +48,15 @@ class ProfileViewModel(
     }
 
     fun onNameChanged(name: String) {
-        _uiState.update { it.copy(displayName = name) }
+        _uiState.update { it.copy(displayName = name, saved = false) }
     }
 
     fun onAgeChanged(age: Int?) {
-        _uiState.update { it.copy(age = age)}
+        _uiState.update { it.copy(age = age, saved = false) }
     }
 
     fun onAvatarSelected(avatarKey: String) {
-        _uiState.update { it.copy(avatarKey = avatarKey) }
+        _uiState.update { it.copy(avatarKey = avatarKey, saved = false) }
     }
 
     fun saveProfile() {
@@ -75,6 +75,7 @@ class ProfileViewModel(
                     avatarKey = state.avatarKey
                 )
             )
+            _uiState.update { it.copy(saved = true) }
         }
     }
 
