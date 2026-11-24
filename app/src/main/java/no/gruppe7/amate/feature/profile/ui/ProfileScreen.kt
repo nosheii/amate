@@ -121,14 +121,18 @@ fun ProfileScreen(
                     colors = fieldColors(),
                     modifier = Modifier.fillMaxWidth().testTag("profile_name")
                 )
+                val saved = uiState.saved
                 Button(
                     onClick = onSaveClick,
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier.fillMaxWidth().testTag("profile_save"),
-                    colors = ButtonDefaults.buttonColors(containerColor = Moss),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (saved) Color(0xFFEFE8CF) else Moss,
+                        contentColor = if (saved) Moss else Color.White,
+                    ),
                     contentPadding = PaddingValues(14.dp)
                 ) {
-                    Text(stringResource(R.string.profile_save))
+                    Text(stringResource(if (saved) R.string.profile_saved else R.string.profile_save))
                 }
             }
         }
